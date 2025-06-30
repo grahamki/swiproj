@@ -12,8 +12,10 @@ app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
 # Configuration
-OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
+# OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')  # Removed OpenAI
 ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY')
+
+print("ANTHROPIC_API_KEY:", ANTHROPIC_API_KEY[:8] if ANTHROPIC_API_KEY else None)
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
@@ -41,69 +43,14 @@ def analyze_morpheme():
         return jsonify({"error": "Failed to analyze word"}), 500
 
 def analyze_word_with_ai(word):
-    """Analyze a word using OpenAI or Anthropic API"""
-    
-    # Try OpenAI first, then Anthropic as fallback
-    if OPENAI_API_KEY:
-        try:
-            return analyze_with_openai(word)
-        except Exception as e:
-            print(f"OpenAI analysis failed: {str(e)}")
-    
+    """Analyze a word using Anthropic API only"""
     if ANTHROPIC_API_KEY:
         try:
             return analyze_with_anthropic(word)
         except Exception as e:
             print(f"Anthropic analysis failed: {str(e)}")
-    
-    # Fallback to mock data if no API keys are available
+    # Fallback to mock data if no API key is available
     return get_mock_analysis(word)
-
-def analyze_with_openai(word):
-    """Analyze word using OpenAI API"""
-    headers = {
-        'Authorization': f'Bearer {OPENAI_API_KEY}',
-        'Content-Type': 'application/json'
-    }
-    
-    prompt = f"""Break "{word}" into morphemes, define each, give related words and a sentence. Return JSON in this exact format:
-{{
-  "prefix": {{"part": "dis", "meaning": "not / opposite of"}},
-  "root": {{"part": "respect", "meaning": "to show regard"}},
-  "suffix1": {{"part": "ful", "meaning": "full of"}},
-  "suffix2": {{"part": "ly", "meaning": "in a way that..."}},
-  "example": "He spoke disrespectfully to the teacher.",
-  "related": ["respect", "respectful", "disrespect"]
-}}
-
-Only return valid JSON, no other text."""
-    
-    data = {
-        'model': 'gpt-3.5-turbo',
-        'messages': [
-            {'role': 'system', 'content': 'You are a linguistic expert specializing in morphological analysis.'},
-            {'role': 'user', 'content': prompt}
-        ],
-        'temperature': 0.3,
-        'max_tokens': 500
-    }
-    
-    response = requests.post('https://api.openai.com/v1/chat/completions', headers=headers, json=data)
-    response.raise_for_status()
-    
-    result = response.json()
-    content = result['choices'][0]['message']['content'].strip()
-    
-    # Extract JSON from response
-    try:
-        return json.loads(content)
-    except json.JSONDecodeError:
-        # Try to extract JSON if it's wrapped in other text
-        import re
-        json_match = re.search(r'\{.*\}', content, re.DOTALL)
-        if json_match:
-            return json.loads(json_match.group())
-        raise
 
 def analyze_with_anthropic(word):
     """Analyze word using Anthropic Claude API"""
@@ -112,38 +59,30 @@ def analyze_with_anthropic(word):
         'Content-Type': 'application/json',
         'anthropic-version': '2023-06-01'
     }
-    
-    prompt = f"""Break "{word}" into morphemes, define each, give related words and a sentence. Return JSON in this exact format:
-{{
-  "prefix": {{"part": "dis", "meaning": "not / opposite of"}},
-  "root": {{"part": "respect", "meaning": "to show regard"}},
-  "suffix1": {{"part": "ful", "meaning": "full of"}},
-  "suffix2": {{"part": "ly", "meaning": "in a way that..."}},
-  "example": "He spoke disrespectfully to the teacher.",
-  "related": ["respect", "respectful", "disrespect"]
-}}
 
-Only return valid JSON, no other text."""
-    
+    prompt = f'Break the word "{word}" into morphemes and return the result as JSON.'
+
     data = {
-        'model': 'claude-3-sonnet-20240229',
+        'model': 'claude-3-haiku-20240307',
         'max_tokens': 500,
         'messages': [
             {'role': 'user', 'content': prompt}
-        ]
+        ],
+        'stream': False
     }
-    
+
+    print("Anthropic request data:", json.dumps(data, indent=2))
+    print("Anthropic headers:", {k: (v[:8] + '...' if k == 'x-api-key' else v) for k, v in headers.items()})
+
     response = requests.post('https://api.anthropic.com/v1/messages', headers=headers, json=data)
     response.raise_for_status()
-    
     result = response.json()
     content = result['content'][0]['text'].strip()
-    
+
     # Extract JSON from response
     try:
         return json.loads(content)
     except json.JSONDecodeError:
-        # Try to extract JSON if it's wrapped in other text
         import re
         json_match = re.search(r'\{.*\}', content, re.DOTALL)
         if json_match:
