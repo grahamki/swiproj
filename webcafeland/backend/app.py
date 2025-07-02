@@ -4,6 +4,7 @@ import os
 import requests
 import json
 from dotenv import load_dotenv
+import anthropic
 
 # Load environment variables from .env file
 load_dotenv()
@@ -54,31 +55,24 @@ def analyze_word_with_ai(word):
 
 def analyze_with_anthropic(word):
     """Analyze word using Anthropic Claude API"""
-    headers = {
-        'x-api-key': ANTHROPIC_API_KEY,
-        'Content-Type': 'application/json',
-        'anthropic-version': '2023-06-01'
-    }
 
     prompt = f'Break the word "{word}" into morphemes and return the result as JSON.'
 
-    data = {
-        'model': 'claude-3-haiku-20240307',
-        'max_tokens': 500,
-        'messages': [
-            {'role': 'user', 'content': prompt}
-        ],
-        'stream': False
-    }
+    client = anthropic.Anthropic()
 
-    print("Anthropic request data:", json.dumps(data, indent=2))
-    print("Anthropic headers:", {k: (v[:8] + '...' if k == 'x-api-key' else v) for k, v in headers.items()})
-
-    response = requests.post('https://api.anthropic.com/v1/messages', headers=headers, json=data)
-    response.raise_for_status()
-    result = response.json()
-    content = result['content'][0]['text'].strip()
-
+    response = client.messages.create(
+        model="claude-opus-4-20250514",
+        max_tokens=1000,
+        temperature=1,
+        system="You are a morpheme analyzer. You will be given a word and you will need to analyze it and return the result as JSON.",
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ])
+    content = response.content[0].text.strip()
+    print("HERE:", content)
     # Extract JSON from response
     try:
         return json.loads(content)
