@@ -1,0 +1,2699 @@
+Question_Number,Problem_Index,Name,Link,Difficulty,Accepted,Submissions,Acceptance_Rate,Likes,Dislikes,Comments,Rating,Topics,Example_Prompt_Full,Example_Prompt_Question,Example_Prompt_Constraints,Example_Prompt_Header,Algorithm_IO_Examples,Example_Correct_Output,Example_Output_Lines,Example_Output_Variables,Example_Output_Structues,Example_Output_Distinct_Structures,Example_Output_Imports,Inputs_1,Output_1,Inputs_2,Output_2,Inputs_3,Output_3
+1582,1,Special Positions In A Binary Matrix,https://leetcode.com/problems/special-positions-in-a-binary-matrix/description/,Easy,148100,215700,0.687,1400,68,68,0.954,"Array, Matrix","Can you write python 2 code to solve this problem using the code snippet below: Special Positions in a Binary Matrix
+Given an m x n binary matrix mat, return the number of special positions in mat.
+
+A position (i, j) is called special if mat[i][j] == 1 and all other elements in row i and column j are 0 (rows and columns are 0-indexed).
+
+
+Constraints:
+
+m == mat.length
+n == mat[i].length
+1 <= m, n <= 100
+mat[i][j] is either 0 or 1.
+
+    def numSpecial(mat):
+        """"""
+        :type mat: List[List[int]]
+        :rtype: int
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Special Positions in a Binary Matrix
+Given an m x n binary matrix mat, return the number of special positions in mat.
+
+A position (i, j) is called special if mat[i][j] == 1 and all other elements in row i and column j are 0 (rows and columns are 0-indexed). ","Constraints:
+
+m == mat.length
+n == mat[i].length
+1 <= m, n <= 100
+mat[i][j] is either 0 or 1.","def numSpecial(mat):
+        """"""
+        :type mat: List[List[int]]
+        :rtype: int
+        """"""","Example 1:
+
+Input: mat = [[1,0,0],[0,0,1],[1,0,0]]
+Output: 1
+Explanation: (1, 2) is a special position because mat[1][2] == 1 and all other elements in row 1 and column 2 are 0.
+Example 2:
+
+
+Input: mat = [[1,0,0],[0,1,0],[0,0,1]]
+Output: 3
+Explanation: (0, 0), (1, 1) and (2, 2) are special positions.
+ ","class Solution(object):
+    def numSpecial(self, mat):
+        """"""
+        :type mat: List[List[int]]
+        :rtype: int
+        """"""
+        def is_special(mat, i, j):
+            # Check if the element at (i, j) is 1
+            if mat[i][j] != 1:
+                return False
+            # Check the entire row i
+            for col in range(len(mat[0])):
+                if col != j and mat[i][col] == 1:
+                    return False
+            # Check the entire column j
+            for row in range(len(mat)):
+                if row != i and mat[row][j] == 1:
+                    return False
+            return True
+
+        count = 0
+        for i in range(len(mat)):
+            for j in range(len(mat[0])):
+                if is_special(mat, i, j):
+                    count += 1
+        return count",26,8,8,2,0,"[[[1,0,0],[0,0,1],[1,0,0]]]",1,"[[[1,0,0],[0,1,0],[0,0,1]]]",3,"[[[1,1,0],[0,0,0],[0,0,0]]]",0
+1763,2,Longest Nice Substring,https://leetcode.com/problems/longest-nice-substring/description/,Easy,56800,93700,0.606,1300,881,47,0.596,"Hash Table, String, Divide and Conquer, Bit Manipulation, Sliding Window","Can you write python 2 code to solve this problem using the code snippet below:Longest Nice Substring
+
+A string s is nice if, for every letter of the alphabet that s contains, it appears both in uppercase and lowercase. For example, ""abABB"" is nice because 'A' and 'a' appear, and 'B' and 'b' appear. However, ""abA"" is not because 'b' appears, but 'B' does not.
+
+Given a string s, return the longest substring of s that is nice. If there are multiple, return the substring of the earliest occurrence. If there are none, return an empty string.
+
+
+
+Constraints:
+
+1 <= s.length <= 100
+s consists of uppercase and lowercase English letters.
+
+    def longestNiceSubstring(s):
+        """"""
+        :type s: str
+        :rtype: str
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Longest Nice Substring
+
+A string s is nice if, for every letter of the alphabet that s contains, it appears both in uppercase and lowercase. For example, ""abABB"" is nice because 'A' and 'a' appear, and 'B' and 'b' appear. However, ""abA"" is not because 'b' appears, but 'B' does not.
+
+Given a string s, return the longest substring of s that is nice. If there are multiple, return the substring of the earliest occurrence. If there are none, return an empty string. ","Constraints:
+
+1 <= s.length <= 100
+s consists of uppercase and lowercase English letters.
+","def longestNiceSubstring(s):
+        """"""
+        :type s: str
+        :rtype: str
+        """"""","Example 1:
+
+Input: s = ""YazaAay""
+Output: ""aAa""
+Explanation: ""aAa"" is a nice string because 'A/a' is the only letter of the alphabet in s, and both 'A' and 'a' appear.
+""aAa"" is the longest nice substring.
+Example 2:
+
+Input: s = ""Bb""
+Output: ""Bb""
+Explanation: ""Bb"" is a nice string because both 'B' and 'b' appear. The whole string is a substring.
+Example 3:
+
+Input: s = ""c""
+Output: """"
+Explanation: There are no nice substrings.
+ ","class Solution(object):
+    def longestNiceSubstring(self, s):
+        """"""
+        :type s: str
+        :rtype: str
+        """"""
+        def is_nice(sub):
+            set_sub = set(sub)
+            for ch in set_sub:
+                if ch.swapcase() not in set_sub:
+                    return False
+            return True
+        
+        max_len = 0
+        result = """"
+        
+        for i in range(len(s)):
+            for j in range(i + 1, len(s) + 1):
+                sub = s[i:j]
+                if is_nice(sub) and len(sub) > max_len:
+                    max_len = len(sub)
+                    result = sub
+        
+        return result",24,10,7,3,0,"[""YazaAay""]",aAa,"[""Bb""]",Bb,"[""c""]",
+1791,3,Find Center Of Star Graph,https://leetcode.com/problems/find-center-of-star-graph/description/,Easy,337800,389800,0.867,1800,174,142,0.912,Graph,"Can you write python 2 code to solve this problem using the code snippet below:Find Center of Star Graph
+
+There is an undirected star graph consisting of n nodes labeled from 1 to n. A star graph is a graph where there is one center node and exactly n - 1 edges that connect the center node with every other node.
+
+You are given a 2D integer array edges where each edges[i] = [ui, vi] indicates that there is an edge between the nodes ui and vi. Return the center of the given star graph.
+
+
+Constraints:
+
+3 <= n <= 10^5
+edges.length == n - 1
+edges[i].length == 2
+1 <= ui, vi <= n
+ui != vi
+The given edges represent a valid star graph.
+
+    def findCenter(edges):
+        """"""
+        :type edges: List[List[int]]
+        :rtype: int
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Find Center of Star Graph
+
+There is an undirected star graph consisting of n nodes labeled from 1 to n. A star graph is a graph where there is one center node and exactly n - 1 edges that connect the center node with every other node.
+
+You are given a 2D integer array edges where each edges[i] = [ui, vi] indicates that there is an edge between the nodes ui and vi. Return the center of the given star graph. ","Constraints:
+
+3 <= n <= 10^5
+edges.length == n - 1
+edges[i].length == 2
+1 <= ui, vi <= n
+ui != vi
+The given edges represent a valid star graph.","def findCenter(edges):
+        """"""
+        :type edges: List[List[int]]
+        :rtype: int
+        """"""","Example 1:
+
+Input: edges = [[1,2],[2,3],[4,2]]
+Output: 2
+Explanation: As shown in the figure above, node 2 is connected to every other node, so 2 is the center.
+Example 2:
+
+Input: edges = [[1,2],[5,1],[1,3],[1,4]]
+Output: 1
+ ","class Solution(object):
+    def findCenter(self, edges):
+        """"""
+        :type edges: List[List[int]]
+        :rtype: int
+        """"""
+        # The center will be either edges[0][0] or edges[0][1]
+        # because it will appear in every edge
+        if edges[0][0] == edges[1][0] or edges[0][0] == edges[1][1]:
+            return edges[0][0]
+        else:
+            return edges[0][1]",12,2,0,0,0,"[[[1,2],[2,3],[4,2]]]",2,"[[[1,2],[5,1],[1,3],[1,4]]]",1,"[[[2,1],[5,1],[1,3],[1,4],[6,1]]]",1
+1971,4,Find If Path Exists In Graph,https://leetcode.com/problems/find-if-path-exists-in-graph/description/,Easy,452100,835700,0.541,3900,223,172,0.946,"Depth First Search, Breadth-First Search, Union Find, Graph","Can you write python 2 code to solve this problem using the code snippet below:Find if Path Exists in Graph
+
+There is a bi-directional graph with n vertices, where each vertex is labeled from 0 to n - 1 (inclusive). The edges in the graph are represented as a 2D integer array edges, where each edges[i] = [ui, vi] denotes a bi-directional edge between vertex ui and vertex vi. Every vertex pair is connected by at most one edge, and no vertex has an edge to itself.
+
+You want to determine if there is a valid path that exists from vertex source to vertex destination.
+
+Given edges and the integers n, source, and destination, return true if there is a valid path from source to destination, or false otherwise.
+
+Constraints:
+
+1 <= n <= 2 * 10^5
+0 <= edges.length <= 2 * 10^5
+edges[i].length == 2
+0 <= ui, vi <= n - 1
+ui != vi
+0 <= source, destination <= n - 1
+There are no duplicate edges.
+There are no self edges.
+
+    def validPath(n, edges, source, destination):
+        """"""
+        :type n: int
+        :type edges: List[List[int]]
+        :type source: int
+        :type destination: int
+        :rtype: bool
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Find if Path Exists in Graph
+
+There is a bi-directional graph with n vertices, where each vertex is labeled from 0 to n - 1 (inclusive). The edges in the graph are represented as a 2D integer array edges, where each edges[i] = [ui, vi] denotes a bi-directional edge between vertex ui and vertex vi. Every vertex pair is connected by at most one edge, and no vertex has an edge to itself.
+
+You want to determine if there is a valid path that exists from vertex source to vertex destination.
+
+Given edges and the integers n, source, and destination, return true if there is a valid path from source to destination, or false otherwise. ","Constraints:
+
+1 <= n <= 2 * 10^5
+0 <= edges.length <= 2 * 10^5
+edges[i].length == 2
+0 <= ui, vi <= n - 1
+ui != vi
+0 <= source, destination <= n - 1
+There are no duplicate edges.
+There are no self edges.","def validPath(n, edges, source, destination):
+        """"""
+        :type n: int
+        :type edges: List[List[int]]
+        :type source: int
+        :type destination: int
+        :rtype: bool
+        """"""","Example 1:
+
+Input: n = 3, edges = [[0,1],[1,2],[2,0]], source = 0, destination = 2
+Output: true
+Explanation: There are two paths from vertex 0 to vertex 2:
+- 0 → 1 → 2
+- 0 → 2
+Example 2:
+
+
+Input: n = 6, edges = [[0,1],[0,2],[3,5],[5,4],[4,3]], source = 0, destination = 5
+Output: false
+Explanation: There is no path from vertex 0 to vertex 5.
+ 
+","class Solution(object):
+    def validPath(self, n, edges, source, destination):
+        """"""
+        :type n: int
+        :type edges: List[List[int]]
+        :type source: int
+        :type destination: int
+        :rtype: bool
+        """"""
+        # Create adjacency list
+        graph = [[] for _ in range(n)]
+        for edge in edges:
+            u, v = edge
+            graph[u].append(v)
+            graph[v].append(u)
+        
+        # Perform DFS to check if path exists
+        visited = [False] * n
+        
+        def dfs(node):
+            if node == destination:
+                return True
+            visited[node] = True
+            for neighbor in graph[node]:
+                if not visited[neighbor]:
+                    if dfs(neighbor):
+                        return True
+            return False
+        
+        return dfs(source)",30,12,3,2,0,"[3, [[0,1],[1,2],[2,0]], 0, 2]",TRUE,"[6, [[0,1],[0,2],[3,5],[5,4],[4,3]], 0, 5]",FALSE,"[6, [[0,1],[0,2],[3,5],[5,4],[4,3]], 2, 5]",FALSE
+2000,5,Reverse Prefix Of Word,https://leetcode.com/problems/reverse-prefix-of-word/description/,Easy,267200,309700,0.863,1300,36,97,0.973,"Two Pointers, String","Can you write python 2 code to solve this problem using the code snippet below:Reverse Prefix of Word
+
+Given a 0-indexed string word and a character ch, reverse the segment of word that starts at index 0 and ends at the index of the first occurrence of ch (inclusive). If the character ch does not exist in word, do nothing.
+
+For example, if word = ""abcdefd"" and ch = ""d"", then you should reverse the segment that starts at 0 and ends at 3 (inclusive). The resulting string will be ""dcbaefd"".
+Return the resulting string.
+ 
+
+Constraints:
+
+1 <= word.length <= 250
+word consists of lowercase English letters.
+ch is a lowercase English letter.
+
+    def reversePrefix(word, ch):
+        """"""
+        :type word: str
+        :type ch: str
+        :rtype: str
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Reverse Prefix of Word
+
+Given a 0-indexed string word and a character ch, reverse the segment of word that starts at index 0 and ends at the index of the first occurrence of ch (inclusive). If the character ch does not exist in word, do nothing.
+
+For example, if word = ""abcdefd"" and ch = ""d"", then you should reverse the segment that starts at 0 and ends at 3 (inclusive). The resulting string will be ""dcbaefd"".
+Return the resulting string. ","Constraints:
+
+1 <= word.length <= 250
+word consists of lowercase English letters.
+ch is a lowercase English letter.
+","def reversePrefix(word, ch):
+        """"""
+        :type word: str
+        :type ch: str
+        :rtype: str
+        """"""","Example 1:
+
+Input: word = ""abcdefd"", ch = ""d""
+Output: ""dcbaefd""
+Explanation: The first occurrence of ""d"" is at index 3. 
+Reverse the part of word from 0 to 3 (inclusive), the resulting string is ""dcbaefd"".
+Example 2:
+
+Input: word = ""xyxzxe"", ch = ""z""
+Output: ""zxyxxe""
+Explanation: The first and only occurrence of ""z"" is at index 3.
+Reverse the part of word from 0 to 3 (inclusive), the resulting string is ""zxyxxe"".
+Example 3:
+
+Input: word = ""abcd"", ch = ""z""
+Output: ""abcd""
+Explanation: ""z"" does not exist in word.
+You should not do any reverse operation, the resulting string is ""abcd"".","class Solution(object):
+    def reversePrefix(self, word, ch):
+        """"""
+        :type word: str
+        :type ch: str
+        :rtype: str
+        """"""
+        index = word.find(ch)
+        if index == -1:
+            return word
+        return word[:index+1][::-1] + word[index+1:]",11,4,0,0,0,"[""abcdefd"", ""d""]",dcbaefd,"[""xyxzxe"", ""z""]",zxyxxe,"[""abcd"", ""z""]",abcd
+2006,6,Count Number Of Pairs With Absolute Difference K,https://leetcode.com/problems/count-number-of-pairs-with-absolute-difference-k/description/,Easy,157600,187600,0.84,1600,42,17,0.974,"Array, Hash Table, Counting","Can you write python 2 code to solve this problem using the code snippet below:Count Number of Pairs With Absolute Difference K
+
+Given an integer array nums and an integer k, return the number of pairs (i, j) where i < j such that |nums[i] - nums[j]| == k.
+
+The value of |x| is defined as:
+
+x if x >= 0.
+-x if x < 0.
+ 
+Constraints:
+
+1 <= nums.length <= 200
+1 <= nums[i] <= 100
+1 <= k <= 99
+
+    def countKDifference(nums, k):
+        """"""
+        :type nums: List[int]
+        :type k: int
+        :rtype: int
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Count Number of Pairs With Absolute Difference K
+
+Given an integer array nums and an integer k, return the number of pairs (i, j) where i < j such that |nums[i] - nums[j]| == k.
+
+The value of |x| is defined as:
+
+x if x >= 0.
+-x if x < 0. ","Constraints:
+
+1 <= nums.length <= 200
+1 <= nums[i] <= 100
+1 <= k <= 99","def countKDifference(nums, k):
+        """"""
+        :type nums: List[int]
+        :type k: int
+        :rtype: int
+        """"""","Example 1:
+
+Input: nums = [1,2,2,1], k = 1
+Output: 4
+Explanation: The pairs with an absolute difference of 1 are:
+- [1,2,2,1]
+- [1,2,2,1]
+- [1,2,2,1]
+- [1,2,2,1]
+Example 2:
+
+Input: nums = [1,3], k = 3
+Output: 0
+Explanation: There are no pairs with an absolute difference of 3.
+Example 3:
+
+Input: nums = [3,2,1,5,4], k = 2
+Output: 3
+Explanation: The pairs with an absolute difference of 2 are:
+- [3,2,1,5,4]
+- [3,2,1,5,4]
+- [3,2,1,5,4]
+ 
+","class Solution(object):
+    def countKDifference(self, nums, k):
+        """"""
+        :type nums: List[int]
+        :type k: int
+        :rtype: int
+        """"""
+        count = 0
+        for i in range(len(nums)):
+            for j in range(i + 1, len(nums)):
+                if abs(nums[i] - nums[j]) == k:
+                    count += 1
+        return count",13,6,5,3,0,"[[1,2,2,1], 1]",4,"[[1,3], 3]",0,"[[3,2,1,5,4], 2]",3
+2231,7,Largest Number After Digit Swaps By Parity,https://leetcode.com/problems/largest-number-after-digit-swaps-by-parity/description/,Easy,44600,72100,0.619,613,297,12,0.674,"Sorting, Heap (Priority Queue)","Can you write python 2 code to solve this problem using the code snippet below:Largest Number After Digit Swaps by Parity
+
+You are given a positive integer num. You may swap any two digits of num that have the same parity (i.e. both odd digits or both even digits).
+
+Return the largest possible value of num after any number of swaps.
+
+Constraints:
+
+1 <= num <= 10^9
+    def largestInteger(num):
+        """"""
+        :type num: int
+        :rtype: int
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Largest Number After Digit Swaps by Parity
+
+You are given a positive integer num. You may swap any two digits of num that have the same parity (i.e. both odd digits or both even digits).
+
+Return the largest possible value of num after any number of swaps. ","Constraints:
+
+1 <= num <= 10^9
+    def largestInteger(num):
+        """"""
+        :type num: int
+        :rtype: int
+        """"""","def largestInteger(num):
+        """"""
+        :type num: int
+        :rtype: int
+        """"""","Example 1:
+
+Input: num = 1234
+Output: 3412
+Explanation: Swap the digit 3 with the digit 1, this results in the number 3214.
+Swap the digit 2 with the digit 4, this results in the number 3412.
+Note that there may be other sequences of swaps but it can be shown that 3412 is the largest possible number.
+Also note that we may not swap the digit 4 with the digit 1 since they are of different parities.
+Example 2:
+
+Input: num = 65875
+Output: 87655
+Explanation: Swap the digit 8 with the digit 6, this results in the number 85675.
+Swap the first digit 5 with the digit 7, this results in the number 87655.
+Note that there may be other sequences of swaps but it can be shown that 87655 is the largest possible number.
+ 
+","class Solution(object):
+    def largestInteger(self, num):
+        """"""
+        :type num: int
+        :rtype: int
+        """"""
+        # Convert the number to a list of digits
+        digits = list(str(num))
+        
+        # Separate the digits by parity
+        odd_digits = sorted([d for d in digits if int(d) % 2 != 0], reverse=True)
+        even_digits = sorted([d for d in digits if int(d) % 2 == 0], reverse=True)
+        
+        # Reconstruct the number using the sorted digits
+        for i in range(len(digits)):
+            if int(digits[i]) % 2 == 0:
+                digits[i] = even_digits.pop(0)
+            else:
+                digits[i] = odd_digits.pop(0)
+        
+        # Convert the list of digits back to an integer
+        return int("""".join(digits))",22,8,11,6,0,[1234],3412,[65875],87655,[317219],973211
+2236,8,Root Equals Sum Of Children,https://leetcode.com/problems/root-equals-sum-of-children/description/,Easy,236700,280100,0.845,1300,1528,75,0.46,"Tree, Binary Tree","Can you write python 2 code to solve this problem using the code snippet below:Root Equals Sum of Children
+
+You are given the root of a binary tree that consists of exactly 3 nodes: the root, its left child, and its right child.
+
+Return true if the value of the root is equal to the sum of the values of its two children, or false otherwise.
+
+ 
+Constraints:
+
+The tree consists only of the root, its left child, and its right child.
+-100 <= Node.val <= 100
+
+# Definition for a binary tree node.
+# class TreeNode(object):
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+    def checkTree(root):
+        """"""
+        :type root: Optional[TreeNode]
+        :rtype: bool
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Root Equals Sum of Children
+
+You are given the root of a binary tree that consists of exactly 3 nodes: the root, its left child, and its right child.
+
+Return true if the value of the root is equal to the sum of the values of its two children, or false otherwise. ","Constraints:
+
+The tree consists only of the root, its left child, and its right child.
+-100 <= Node.val <= 100","# Definition for a binary tree node.
+# class TreeNode(object):
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+    def checkTree(root):
+        """"""
+        :type root: Optional[TreeNode]
+        :rtype: bool
+        """"""","Example 1:
+
+Input: root = [10,4,6]
+Output: true
+Explanation: The values of the root, its left child, and its right child are 10, 4, and 6, respectively.
+10 is equal to 4 + 6, so we return true.
+Example 2:
+
+
+Input: root = [5,3,1]
+Output: false
+Explanation: The values of the root, its left child, and its right child are 5, 3, and 1, respectively.
+5 is not equal to 3 + 1, so we return false.
+ 
+","class Solution(object):
+    def checkTree(self, root):
+        """"""
+        :type root: TreeNode
+        :rtype: bool
+        """"""
+        return root.val == root.left.val + root.right.val",7,2,0,0,0,"[[10,4,6]]",TRUE,"[[5,3,1]]",FALSE,"[[19,3,16]]",TRUE
+2578,9,Split With Minimum Sum,https://leetcode.com/problems/split-with-minimum-sum/description/,Easy,35900,50800,0.707,366,28,10,0.929,"Math, Greedy, Sorting","Can you write python 2 code to solve this problem using the code snippet below: Split With Minimum Sum
+
+Given a positive integer num, split it into two non-negative integers num1 and num2 such that:
+
+The concatenation of num1 and num2 is a permutation of num.
+In other words, the sum of the number of occurrences of each digit in num1 and num2 is equal to the number of occurrences of that digit in num.
+num1 and num2 can contain leading zeros.
+Return the minimum possible sum of num1 and num2.
+
+Notes:
+
+It is guaranteed that num does not contain any leading zeros.
+The order of occurrence of the digits in num1 and num2 may differ from the order of occurrence of num.
+ 
+
+Constraints:
+
+10 <= num <= 10^9
+
+    def splitNum(num):
+        """"""
+        :type num: int
+        :rtype: int
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Split With Minimum Sum
+
+Given a positive integer num, split it into two non-negative integers num1 and num2 such that:
+
+The concatenation of num1 and num2 is a permutation of num.
+In other words, the sum of the number of occurrences of each digit in num1 and num2 is equal to the number of occurrences of that digit in num.
+num1 and num2 can contain leading zeros.
+Return the minimum possible sum of num1 and num2.
+
+Notes:
+
+It is guaranteed that num does not contain any leading zeros.
+The order of occurrence of the digits in num1 and num2 may differ from the order of occurrence of num. ","Constraints:
+
+10 <= num <= 10^9","def splitNum(num):
+        """"""
+        :type num: int
+        :rtype: int
+        """"""","Example 1:
+
+Input: num = 4325
+Output: 59
+Explanation: We can split 4325 so that num1 is 24 and num2 is 35, giving a sum of 59. We can prove that 59 is indeed the minimal possible sum.
+Example 2:
+
+Input: num = 687
+Output: 75
+Explanation: We can split 687 so that num1 is 68 and num2 is 7, which would give an optimal sum of 75.
+ ","class Solution(object):
+    def splitNum(self, num):
+        """"""
+        :type num: int
+        :rtype: int
+        """"""
+        # Convert the number to a string and sort the digits
+        digits = sorted(str(num))
+        
+        # Initialize the two numbers as empty strings
+        num1 = """"
+        num2 = """"
+        
+        # Distribute the digits between the two numbers
+        for i in range(len(digits)):
+            if i % 2 == 0:
+                num1 += digits[i]
+            else:
+                num2 += digits[i]
+        
+        # Convert the numbers back to integers and return their sum
+        return int(num1) + int(num2)",22,6,5,4,0,[4325],59,[687],75,[2318],41
+3014,10,Minimum Number Of Pushes To Type Word I,https://leetcode.com/problems/minimum-number-of-pushes-to-type-word-i/description/,Easy,34300,53500,0.641,116,25,15,0.823,"Math, String, Greedy","Can you write python 2 code to solve this problem using the code snippet below:Minimum Number of Pushes to Type Word I
+
+You are given a string word containing distinct lowercase English letters.
+
+Telephone keypads have keys mapped with distinct collections of lowercase English letters, which can be used to form words by pushing them. For example, the key 2 is mapped with [""a"",""b"",""c""], we need to push the key one time to type ""a"", two times to type ""b"", and three times to type ""c"" .
+
+It is allowed to remap the keys numbered 2 to 9 to distinct collections of letters. The keys can be remapped to any amount of letters, but each letter must be mapped to exactly one key. You need to find the minimum number of times the keys will be pushed to type the string word.
+
+Return the minimum number of pushes needed to type word after remapping the keys.
+
+An example mapping of letters to keys on a telephone keypad is given below. Note that 1, *, #, and 0 do not map to any letters.
+
+
+Constraints:
+
+1 <= word.length <= 26
+word consists of lowercase English letters.
+All letters in word are distinct.
+
+    def minimumPushes(word):
+        """"""
+        :type word: str
+        :rtype: int
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Minimum Number of Pushes to Type Word I
+
+You are given a string word containing distinct lowercase English letters.
+
+Telephone keypads have keys mapped with distinct collections of lowercase English letters, which can be used to form words by pushing them. For example, the key 2 is mapped with [""a"",""b"",""c""], we need to push the key one time to type ""a"", two times to type ""b"", and three times to type ""c"" .
+
+It is allowed to remap the keys numbered 2 to 9 to distinct collections of letters. The keys can be remapped to any amount of letters, but each letter must be mapped to exactly one key. You need to find the minimum number of times the keys will be pushed to type the string word.
+
+Return the minimum number of pushes needed to type word after remapping the keys.
+
+An example mapping of letters to keys on a telephone keypad is given below. Note that 1, *, #, and 0 do not map to any letters. ","Constraints:
+
+1 <= word.length <= 26
+word consists of lowercase English letters.
+All letters in word are distinct.","def minimumPushes(word):
+        """"""
+        :type word: str
+        :rtype: int
+        """"""","Example 1:
+
+Input: word = ""abcde""
+Output: 5
+Explanation: The remapped keypad given in the image provides the minimum cost.
+""a"" -> one push on key 2
+""b"" -> one push on key 3
+""c"" -> one push on key 4
+""d"" -> one push on key 5
+""e"" -> one push on key 6
+Total cost is 1 + 1 + 1 + 1 + 1 = 5.
+It can be shown that no other mapping can provide a lower cost.
+Example 2:
+
+
+Input: word = ""xycdefghij""
+Output: 12
+Explanation: The remapped keypad given in the image provides the minimum cost.
+""x"" -> one push on key 2
+""y"" -> two pushes on key 2
+""c"" -> one push on key 3
+""d"" -> two pushes on key 3
+""e"" -> one push on key 4
+""f"" -> one push on key 5
+""g"" -> one push on key 6
+""h"" -> one push on key 7
+""i"" -> one push on key 8
+""j"" -> one push on key 9
+Total cost is 1 + 2 + 1 + 2 + 1 + 1 + 1 + 1 + 1 + 1 = 12.
+It can be shown that no other mapping can provide a lower cost.
+ 
+","class Solution(object):
+    def minimumPushes(self, word):
+        """"""
+        :type word: str
+        :rtype: int
+        """"""
+        # The letters must be mapped to the keys in such a way to minimize the number of pushes.
+        # We need to find the optimal way to distribute the letters over the keys 2 to 9.
+        
+        # First, sort the word to facilitate optimal distribution.
+        word = sorted(word)
+        
+        # We will use a greedy approach to assign letters to keys 2 to 9.
+        # We assign letters in order to the keys in a round-robin fashion.
+        min_pushes = 0
+        key_count = [0] * 8  # There are 8 keys (2 to 9)
+        
+        for i in range(len(word)):
+            key_index = i % 8
+            key_count[key_index] += 1
+            min_pushes += key_count[key_index]
+        
+        return min_pushes",23,5,2,2,0,"[""abcde""]",5,"[""xycdefghij""]",12,"[""ajsducnemqop""]",16
+1004,11,Max Consecutive Ones Iii,https://leetcode.com/problems/max-consecutive-ones-iii/description/,Medium,612100,961300,0.637,8600,134,49,0.985,"Array, Binary Search, Sliding Window, Prefix Sum","Can you write python 2 code to solve this problem using the code snippet below: Max Consecutive Ones III
+
+Given a binary array nums and an integer k, return the maximum number of consecutive 1's in the array if you can flip at most k 0's.
+
+Constraints:
+
+1 <= nums.length <= 105
+nums[i] is either 0 or 1.
+0 <= k <= nums.length
+
+    def longestOnes(nums, k):
+        """"""
+        :type nums: List[int]
+        :type k: int
+        :rtype: int
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Max Consecutive Ones III
+
+Given a binary array nums and an integer k, return the maximum number of consecutive 1's in the array if you can flip at most k 0's. ","Constraints:
+
+1 <= nums.length <= 105
+nums[i] is either 0 or 1.
+0 <= k <= nums.length","def longestOnes(nums, k):
+        """"""
+        :type nums: List[int]
+        :type k: int
+        :rtype: int
+        """"""","Example 1:
+
+Input: nums = [1,1,1,0,0,0,1,1,1,1,0], k = 2
+Output: 6
+Explanation: [1,1,1,0,0,1,1,1,1,1,1]
+Bolded numbers were flipped from 0 to 1. The longest subarray is underlined.
+Example 2:
+
+Input: nums = [0,0,1,1,0,0,1,1,1,0,1,1,0,0,0,1,1,1,1], k = 3
+Output: 10
+Explanation: [0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1]
+Bolded numbers were flipped from 0 to 1. The longest subarray is underlined.
+ 
+","class Solution(object):
+    def longestOnes(self, nums, k):
+        """"""
+        :type nums: List[int]
+        :type k: int
+        :rtype: int
+        """"""
+        left = 0
+        for right in range(len(nums)):
+            if nums[right] == 0:
+                k -= 1
+            if k < 0:
+                if nums[left] == 0:
+                    k += 1
+                left += 1
+        return right - left + 1",16,5,2,2,0,"[[1,1,1,0,0,0,1,1,1,1,0], 2]",6,"[[0,0,1,1,0,0,1,1,1,0,1,1,0,0,0,1,1,1,1], 3]",10,"[[1,1,1,0,0,0,1,1,1,1,0,1,1,1,1,1,0], 6]",17
+1657,12,Determine If Two Strings Are Close,https://leetcode.com/problems/determine-if-two-strings-are-close/description/,Medium,356300,652700,0.546,3700,293,174,0.927,"Hash Table, String, Sorting, Counting","Can you write python 2 code to solve this problem using the code snippet below:Determine if Two Strings Are Close
+
+Two strings are considered close if you can attain one from the other using the following operations:
+
+Operation 1: Swap any two existing characters.
+For example, abcde -> aecdb
+Operation 2: Transform every occurrence of one existing character into another existing character, and do the same with the other character.
+For example, aacabb -> bbcbaa (all a's turn into b's, and all b's turn into a's)
+You can use the operations on either string as many times as necessary.
+
+Given two strings, word1 and word2, return true if word1 and word2 are close, and false otherwise.
+
+Constraints:
+
+1 <= word1.length, word2.length <= 105
+word1 and word2 contain only lowercase English letters.
+
+    def closeStrings(word1, word2):
+        """"""
+        :type word1: str
+        :type word2: str
+        :rtype: bool
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Determine if Two Strings Are Close
+
+Two strings are considered close if you can attain one from the other using the following operations:
+
+Operation 1: Swap any two existing characters.
+For example, abcde -> aecdb
+Operation 2: Transform every occurrence of one existing character into another existing character, and do the same with the other character.
+For example, aacabb -> bbcbaa (all a's turn into b's, and all b's turn into a's)
+You can use the operations on either string as many times as necessary.
+
+Given two strings, word1 and word2, return true if word1 and word2 are close, and false otherwise. ","Constraints:
+
+1 <= word1.length, word2.length <= 105
+word1 and word2 contain only lowercase English letters.","def closeStrings(word1, word2):
+        """"""
+        :type word1: str
+        :type word2: str
+        :rtype: bool
+        """"""","Example 1:
+
+Input: word1 = ""abc"", word2 = ""bca""
+Output: true
+Explanation: You can attain word2 from word1 in 2 operations.
+Apply Operation 1: ""abc"" -> ""acb""
+Apply Operation 1: ""acb"" -> ""bca""
+Example 2:
+
+Input: word1 = ""a"", word2 = ""aa""
+Output: false
+Explanation: It is impossible to attain word2 from word1, or vice versa, in any number of operations.
+Example 3:
+
+Input: word1 = ""cabbba"", word2 = ""abbccc""
+Output: true
+Explanation: You can attain word2 from word1 in 3 operations.
+Apply Operation 1: ""cabbba"" -> ""caabbb""
+Apply Operation 2: ""caabbb"" -> ""baaccc""
+Apply Operation 2: ""baaccc"" -> ""abbccc""
+ ","class Solution(object):
+    def closeStrings(self, word1, word2):
+        """"""
+        :type word1: str
+        :type word2: str
+        :rtype: bool
+        """"""
+        from collections import Counter
+        
+        # If lengths of the words are not equal, they cannot be close
+        if len(word1) != len(word2):
+            return False
+        
+        # Check if both words have the same set of unique characters
+        if set(word1) != set(word2):
+            return False
+        
+        # Check if both words have the same character frequencies
+        if sorted(Counter(word1).values()) != sorted(Counter(word2).values()):
+            return False
+        
+        return True",22,4,6,3,1,"[""abc"", ""bca""]",TRUE,"[""a"", ""aa""]",FALSE,"[""cabbba"", ""abbccc""]",TRUE
+1669,13,Merge In Between Linked Lists,https://leetcode.com/problems/merge-in-between-linked-lists/description/,Medium,218300,267400,0.816,2100,219,107,0.906,Linked List,"Can you write python 2 code to solve this problem using the code snippet below:Merge In Between Linked Lists
+
+You are given two linked lists: list1 and list2 of sizes n and m respectively.
+
+Remove list1's nodes from the ath node to the bth node, and put list2 in their place.
+
+The blue edges and nodes in the following figure indicate the result:
+
+
+Build the result list and return its head.
+
+Constraints:
+
+3 <= list1.length <= 10^4
+1 <= a <= b < list1.length - 1
+1 <= list2.length <= 10^4
+
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+    def mergeInBetween(list1, a, b, list2):
+        """"""
+        :type list1: ListNode
+        :type a: int
+        :type b: int
+        :type list2: ListNode
+        :rtype: ListNode
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Merge In Between Linked Lists
+
+You are given two linked lists: list1 and list2 of sizes n and m respectively.
+
+Remove list1's nodes from the ath node to the bth node, and put list2 in their place.
+
+The blue edges and nodes in the following figure indicate the result:
+
+
+Build the result list and return its head. ","Constraints:
+
+3 <= list1.length <= 10^4
+1 <= a <= b < list1.length - 1
+1 <= list2.length <= 10^4","# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+    def mergeInBetween(list1, a, b, list2):
+        """"""
+        :type list1: ListNode
+        :type a: int
+        :type b: int
+        :type list2: ListNode
+        :rtype: ListNode
+        """"""","Example 1:
+
+Input: list1 = [10,1,13,6,9,5], a = 3, b = 4, list2 = [1000000,1000001,1000002]
+Output: [10,1,13,1000000,1000001,1000002,5]
+Explanation: We remove the nodes 3 and 4 and put the entire list2 in their place. The blue edges and nodes in the above figure indicate the result.
+Example 2:
+
+
+Input: list1 = [0,1,2,3,4,5,6], a = 2, b = 5, list2 = [1000000,1000001,1000002,1000003,1000004]
+Output: [0,1,1000000,1000001,1000002,1000003,1000004,6]
+Explanation: The blue edges and nodes in the above figure indicate the result.
+ ","# Definition for singly-linked list.
+class ListNode(object):
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+class Solution(object):
+    def mergeInBetween(self, list1, a, b, list2):
+        """"""
+        :type list1: ListNode
+        :type a: int
+        :type b: int
+        :type list2: ListNode
+        :rtype: ListNode
+        """"""
+        # Initialize pointers to traverse list1
+        prev_a = list1
+        for _ in range(a - 1):
+            prev_a = prev_a.next
+        
+        # Initialize pointer to find the node at position b
+        curr_b = prev_a.next
+        for _ in range(b - a + 1):
+            curr_b = curr_b.next
+        
+        # Connect list1's a-1 node to the head of list2
+        prev_a.next = list2
+        
+        # Find the tail of list2
+        tail_list2 = list2
+        while tail_list2.next:
+            tail_list2 = tail_list2.next
+        
+        # Connect the tail of list2 to list1's b+1 node
+        tail_list2.next = curr_b
+        
+        return list1
+",38,12,2,1,0,"[[10,1,13,6,9,5], 3, 4, [1000000,1000001,1000002]]","[10,1,13,1000000,1000001,1000002,5]","[[0,1,2,3,4,5,6], 2, 5,[1000000,1000001,1000002,1000003,1000004]]","[0,1,1000000,1000001,1000002,1000003,1000004,6]","[[0,1,2,3,4,5,6], 1, 5, [1000000,1000001,1000002,1000003,1000004]]","[0,1000000,1000001,1000002,1000003,1000004,6"
+2001,14,Number Of Pairs Of Interchangeable Rectangles,https://leetcode.com/problems/number-of-pairs-of-interchangeable-rectangles/description/,Medium,40800,81500,0.501,527,49,19,0.915,"Array, Hash Table, Math, Counting, Number Theory","Can you write python 2 code to solve this problem using the code snippet below: Number of Pairs of Interchangeable Rectangles
+
+You are given n rectangles represented by a 0-indexed 2D integer array rectangles, where rectangles[i] = [widthi, heighti] denotes the width and height of the ith rectangle.
+
+Two rectangles i and j (i < j) are considered interchangeable if they have the same width-to-height ratio. More formally, two rectangles are interchangeable if widthi/heighti == widthj/heightj (using decimal division, not integer division).
+
+Return the number of pairs of interchangeable rectangles in rectangles.
+
+Constraints:
+
+n == rectangles.length
+1 <= n <= 105
+rectangles[i].length == 2
+1 <= widthi, heighti <= 105
+
+    def interchangeableRectangles(rectangles):
+        """"""
+        :type rectangles: List[List[int]]
+        :rtype: int
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below:  Number of Pairs of Interchangeable Rectangles
+
+You are given n rectangles represented by a 0-indexed 2D integer array rectangles, where rectangles[i] = [widthi, heighti] denotes the width and height of the ith rectangle.
+
+Two rectangles i and j (i < j) are considered interchangeable if they have the same width-to-height ratio. More formally, two rectangles are interchangeable if widthi/heighti == widthj/heightj (using decimal division, not integer division).
+
+Return the number of pairs of interchangeable rectangles in rectangles. ","Constraints:
+
+n == rectangles.length
+1 <= n <= 105
+rectangles[i].length == 2
+1 <= widthi, heighti <= 105"," def interchangeableRectangles(rectangles):
+        """"""
+        :type rectangles: List[List[int]]
+        :rtype: int
+        """"""","Example 1:
+
+Input: rectangles = [[4,8],[3,6],[10,20],[15,30]]
+Output: 6
+Explanation: The following are the interchangeable pairs of rectangles by index (0-indexed):
+- Rectangle 0 with rectangle 1: 4/8 == 3/6.
+- Rectangle 0 with rectangle 2: 4/8 == 10/20.
+- Rectangle 0 with rectangle 3: 4/8 == 15/30.
+- Rectangle 1 with rectangle 2: 3/6 == 10/20.
+- Rectangle 1 with rectangle 3: 3/6 == 15/30.
+- Rectangle 2 with rectangle 3: 10/20 == 15/30.
+Example 2:
+
+Input: rectangles = [[4,5],[7,8]]
+Output: 0
+Explanation: There are no interchangeable pairs of rectangles.
+ 
+","class Solution(object):
+    def interchangeableRectangles(self, rectangles):
+        """"""
+        :type rectangles: List[List[int]]
+        :rtype: int
+        """"""
+        from collections import defaultdict
+        
+        ratio_count = defaultdict(int)
+        interchangeable_pairs = 0
+        
+        for width, height in rectangles:
+            ratio = width / float(height)
+            if ratio in ratio_count:
+                interchangeable_pairs += ratio_count[ratio]
+            ratio_count[ratio] += 1
+            
+        return interchangeable_pairs",18,8,2,2,1,"[[[4,8],[3,6],[10,20],[15,30]]]",6,"[[[4,5],[7,8]]]",0,"[[[4,6],[6,8],[9,2],[12,18]]]",1
+2320,15,Count Number Of Ways To Place Houses,https://leetcode.com/problems/count-number-of-ways-to-place-houses/description/,Medium,27700,66000,0.42,577,193,8,0.749,Dynamic Programming,"Can you write python 2 code to solve this problem using the code snippet below: Count Number of Ways to Place Houses
+
+There is a street with n * 2 plots, where there are n plots on each side of the street. The plots on each side are numbered from 1 to n. On each plot, a house can be placed.
+
+Return the number of ways houses can be placed such that no two houses are adjacent to each other on the same side of the street. Since the answer may be very large, return it modulo 109 + 7.
+
+Note that if a house is placed on the ith plot on one side of the street, a house can also be placed on the ith plot on the other side of the street.
+
+Constraints:
+
+1 <= n <= 10^4
+
+    def countHousePlacements(n):
+        """"""
+        :type n: int
+        :rtype: int
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Count Number of Ways to Place Houses
+
+There is a street with n * 2 plots, where there are n plots on each side of the street. The plots on each side are numbered from 1 to n. On each plot, a house can be placed.
+
+Return the number of ways houses can be placed such that no two houses are adjacent to each other on the same side of the street. Since the answer may be very large, return it modulo 109 + 7.
+
+Note that if a house is placed on the ith plot on one side of the street, a house can also be placed on the ith plot on the other side of the street. ","Constraints:
+
+1 <= n <= 10^4","def countHousePlacements(n):
+        """"""
+        :type n: int
+        :rtype: int
+        """"""","Example 1:
+
+Input: n = 1
+Output: 4
+Explanation: 
+Possible arrangements:
+1. All plots are empty.
+2. A house is placed on one side of the street.
+3. A house is placed on the other side of the street.
+4. Two houses are placed, one on each side of the street.
+Example 2:
+
+
+Input: n = 2
+Output: 9
+Explanation: The 9 possible arrangements are shown in the diagram above.
+ ","class Solution(object):
+    def countHousePlacements(self, n):
+        """"""
+        :type n: int
+        :rtype: int
+        """"""
+        MOD = 10**9 + 7
+        
+        # dp[i] will store the number of valid ways to arrange houses on one side of the street for i plots
+        dp = [0] * (n + 1)
+        
+        # Base cases
+        dp[0] = 1  # No plots, one way to do nothing
+        dp[1] = 2  # Either place a house or leave it empty
+
+        for i in range(2, n + 1):
+            # dp[i] is derived from dp[i-1] and dp[i-2]
+            dp[i] = (dp[i-1] + dp[i-2]) % MOD
+        
+        # The total number of ways to arrange houses on both sides
+        result = (dp[n] * dp[n]) % MOD
+        
+        return result",23,6,1,1,0,[1],4,[2],9,[7],1156
+2326,16,Spiral Matrix Iv,https://leetcode.com/problems/spiral-matrix-iv/description/,Medium,42800,56900,0.752,746,27,10,0.965,"Array, Linked List, Matrix, Simulation","Can you write python 2 code to solve this problem using the code snippet below: Spiral Matrix IV
+
+You are given two integers m and n, which represent the dimensions of a matrix.
+
+You are also given the head of a linked list of integers.
+
+Generate an m x n matrix that contains the integers in the linked list presented in spiral order (clockwise), starting from the top-left of the matrix. If there are remaining empty spaces, fill them with -1.
+
+Return the generated matrix.
+
+Constraints:
+
+1 <= m, n <= 10^5
+1 <= m * n <= 10^5
+The number of nodes in the list is in the range [1, m * n].
+0 <= Node.val <= 1000
+
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+    def spiralMatrix(m, n, head):
+        """"""
+        :type m: int
+        :type n: int
+        :type head: Optional[ListNode]
+        :rtype: List[List[int]]
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Spiral Matrix IV
+
+You are given two integers m and n, which represent the dimensions of a matrix.
+
+You are also given the head of a linked list of integers.
+
+Generate an m x n matrix that contains the integers in the linked list presented in spiral order (clockwise), starting from the top-left of the matrix. If there are remaining empty spaces, fill them with -1.
+
+Return the generated matrix. ","Constraints:
+
+1 <= m, n <= 10^5
+1 <= m * n <= 10^5
+The number of nodes in the list is in the range [1, m * n].
+0 <= Node.val <= 1000","# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+    def spiralMatrix(m, n, head):
+        """"""
+        :type m: int
+        :type n: int
+        :type head: Optional[ListNode]
+        :rtype: List[List[int]]
+        """"""","Example 1:
+
+Input: m = 3, n = 5, head = [3,0,2,6,8,1,7,9,4,2,5,5,0]
+Output: [[3,0,2,6,8],[5,0,-1,-1,1],[5,2,4,9,7]]
+Explanation: The diagram above shows how the values are printed in the matrix.
+Note that the remaining spaces in the matrix are filled with -1.
+Example 2:
+
+
+Input: m = 1, n = 4, head = [0,1,2]
+Output: [[0,1,2,-1]]
+Explanation: The diagram above shows how the values are printed from left to right in the matrix.
+The last space in the matrix is set to -1.
+ 
+","# Definition for singly-linked list.
+class ListNode(object):
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+class Solution(object):
+    def spiralMatrix(self, m, n, head):
+        """"""
+        :type m: int
+        :type n: int
+        :type head: Optional[ListNode]
+        :rtype: List[List[int]]
+        """"""
+        # Initialize matrix with -1
+        matrix = [[-1 for _ in range(n)] for _ in range(m)]
+        
+        # Define directions for right, down, left, up movements
+        directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+        current_direction = 0
+        
+        # Start from top-left corner
+        row, col = 0, 0
+        
+        current = head
+        
+        for _ in range(m * n):
+            if not current:
+                break
+            matrix[row][col] = current.val
+            current = current.next
+            
+            # Calculate the next position
+            next_row, next_col = row + directions[current_direction][0], col + directions[current_direction][1]
+            
+            # Check if the next position is within bounds and not yet visited
+            if 0 <= next_row < m and 0 <= next_col < n and matrix[next_row][next_col] == -1:
+                row, col = next_row, next_col
+            else:
+                # Change direction
+                current_direction = (current_direction + 1) % 4
+                row, col = row + directions[current_direction][0], col + directions[current_direction][1]
+        
+        return matrix
+",45,17,3,1,0,"[3, 5, [3,0,2,6,8,1,7,9,4,2,5,5,0]]","[[3,0,2,6,8],[5,0,-1,-1,1],[5,2,4,9,7]]","[1, 4, [0,1,2]]","[[0,1,2,-1]]","[2, 5, [0,1,2,3,4]]","[[0,1,2,3,4],[-1,-1,-1,-1,-1]]"
+2785,17,Sort Vowels In A String,https://leetcode.com/problems/sort-vowels-in-a-string/description/,Medium,132900,163400,0.813,984,57,48,0.945,"String, Sorting","Can you write python 2 code to solve this problem using the code snippet below: Sort Vowels in a String
+
+Given a 0-indexed string s, permute s to get a new string t such that:
+
+All consonants remain in their original places. More formally, if there is an index i with 0 <= i < s.length such that s[i] is a consonant, then t[i] = s[i].
+The vowels must be sorted in the nondecreasing order of their ASCII values. More formally, for pairs of indices i, j with 0 <= i < j < s.length such that s[i] and s[j] are vowels, then t[i] must not have a higher ASCII value than t[j].
+Return the resulting string.
+
+The vowels are 'a', 'e', 'i', 'o', and 'u', and they can appear in lowercase or uppercase. Consonants comprise all letters that are not vowels.
+
+Constraints:
+
+1 <= s.length <= 105
+s consists only of letters of the English alphabet in uppercase and lowercase.
+
+    def sortVowels(s):
+        """"""
+        :type s: str
+        :rtype: str
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Sort Vowels in a String
+
+Given a 0-indexed string s, permute s to get a new string t such that:
+
+All consonants remain in their original places. More formally, if there is an index i with 0 <= i < s.length such that s[i] is a consonant, then t[i] = s[i].
+The vowels must be sorted in the nondecreasing order of their ASCII values. More formally, for pairs of indices i, j with 0 <= i < j < s.length such that s[i] and s[j] are vowels, then t[i] must not have a higher ASCII value than t[j].
+Return the resulting string.
+
+The vowels are 'a', 'e', 'i', 'o', and 'u', and they can appear in lowercase or uppercase. Consonants comprise all letters that are not vowels. ","Constraints:
+
+1 <= s.length <= 105
+s consists only of letters of the English alphabet in uppercase and lowercase.","def sortVowels(s):
+        """"""
+        :type s: str
+        :rtype: str
+        """"""","Example 1:
+
+Input: s = ""lEetcOde""
+Output: ""lEOtcede""
+Explanation: 'E', 'O', and 'e' are the vowels in s; 'l', 't', 'c', and 'd' are all consonants. The vowels are sorted according to their ASCII values, and the consonants remain in the same places.
+Example 2:
+
+Input: s = ""lYmpH""
+Output: ""lYmpH""
+Explanation: There are no vowels in s (all characters in s are consonants), so we return ""lYmpH"".
+ 
+","class Solution(object):
+    def sortVowels(self, s):
+        """"""
+        :type s: str
+        :rtype: str
+        """"""
+        vowels = set('aeiouAEIOU')
+        vowel_list = [c for c in s if c in vowels]
+        vowel_list.sort()
+
+        result = list(s)
+        vowel_index = 0
+
+        for i in range(len(s)):
+            if s[i] in vowels:
+                result[i] = vowel_list[vowel_index]
+                vowel_index += 1
+
+        return ''.join(result)",19,8,5,5,0,"[""lEetcOde""]",lEOtcede,"[""lYmpH""]",lYmpH,"[""tEStCASe""]",tAStCESe
+2924,18,Find Champion Ii,https://leetcode.com/problems/find-champion-ii/description/,Medium,25900,44300,0.585,145,13,12,0.918,Graph,"Can you write python 2 code to solve this problem using the code snippet below: Find Champion II
+
+There are n teams numbered from 0 to n - 1 in a tournament; each team is also a node in a DAG.
+
+You are given the integer n and a 0-indexed 2D integer array edges of length m representing the DAG, where edges[i] = [ui, vi] indicates that there is a directed edge from team ui to team vi in the graph.
+
+A directed edge from a to b in the graph means that team a is stronger than team b and team b is weaker than team a.
+
+Team a will be the champion of the tournament if there is no team b that is stronger than team a.
+
+Return the team that will be the champion of the tournament if there is a unique champion, otherwise, return -1.
+
+Notes
+
+A cycle is a series of nodes a1, a2, ..., an, an+1 such that node a1 is the same node as node an+1, the nodes a1, a2, ..., an are distinct, and there is a directed edge from the node ai to node ai+1 for every i in the range [1, n].
+A DAG is a directed graph that does not have any cycle.
+
+
+Constraints:
+
+1 <= n <= 100
+m == edges.length
+0 <= m <= n * (n - 1) / 2
+edges[i].length == 2
+0 <= edge[i][j] <= n - 1
+edges[i][0] != edges[i][1]
+The input is generated such that if team a is stronger than team b, team b is not stronger than team a.
+The input is generated such that if team a is stronger than team b and team b is stronger than team c, then team a is stronger than team c.
+
+    def findChampion(n, edges):
+        """"""
+        :type n: int
+        :type edges: List[List[int]]
+        :rtype: int
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Find Champion II
+
+There are n teams numbered from 0 to n - 1 in a tournament; each team is also a node in a DAG.
+
+You are given the integer n and a 0-indexed 2D integer array edges of length m representing the DAG, where edges[i] = [ui, vi] indicates that there is a directed edge from team ui to team vi in the graph.
+
+A directed edge from a to b in the graph means that team a is stronger than team b and team b is weaker than team a.
+
+Team a will be the champion of the tournament if there is no team b that is stronger than team a.
+
+Return the team that will be the champion of the tournament if there is a unique champion, otherwise, return -1.
+
+Notes
+
+A cycle is a series of nodes a1, a2, ..., an, an+1 such that node a1 is the same node as node an+1, the nodes a1, a2, ..., an are distinct, and there is a directed edge from the node ai to node ai+1 for every i in the range [1, n].
+A DAG is a directed graph that does not have any cycle. ","Constraints:
+
+1 <= n <= 100
+m == edges.length
+0 <= m <= n * (n - 1) / 2
+edges[i].length == 2
+0 <= edge[i][j] <= n - 1
+edges[i][0] != edges[i][1]
+The input is generated such that if team a is stronger than team b, team b is not stronger than team a.
+The input is generated such that if team a is stronger than team b and team b is stronger than team c, then team a is stronger than team c.","def findChampion(n, edges):
+        """"""
+        :type n: int
+        :type edges: List[List[int]]
+        :rtype: int
+        """"""","Example 1:
+
+Input: n = 3, edges = [[0,1],[1,2]]
+Output: 0
+Explanation: Team 1 is weaker than team 0. Team 2 is weaker than team 1. So the champion is team 0.
+Example 2:
+
+
+
+Input: n = 4, edges = [[0,2],[1,3],[1,2]]
+Output: -1
+Explanation: Team 2 is weaker than team 0 and team 1. Team 3 is weaker than team 1. But team 1 and team 0 are not weaker than any other teams. So the answer is -1.
+ ","class Solution(object):
+    def findChampion(self, n, edges):
+        """"""
+        :type n: int
+        :type edges: List[List[int]]
+        :rtype: int
+        """"""
+        # Initialize an array to count in-degrees of each node
+        in_degree = [0] * n
+        
+        # Iterate over the edges to compute in-degrees
+        for edge in edges:
+            in_degree[edge[1]] += 1
+        
+        # Find the nodes with zero in-degree
+        zero_in_degree = [i for i in range(n) if in_degree[i] == 0]
+        
+        # If there is exactly one node with zero in-degree, return it
+        if len(zero_in_degree) == 1:
+            return zero_in_degree[0]
+        
+        # Otherwise, return -1
+        return -1",23,7,2,2,0,"[3, [[0,1],[1,2]]]",0,"[4, [[0,2],[1,3],[1,2]]]",-1,"[5, [[0,2],[1,3],[1,2],[2,4]]]",-1
+3217,19,Delete Nodes From Linked List Present In Array,https://leetcode.com/problems/delete-nodes-from-linked-list-present-in-array/description/,Medium,37800,61500,0.615,95,3,10,0.969,"Array, Hash Table, Linked List","Can you write python 2 code to solve this problem using the code snippet below: Delete Nodes From Linked List Present in Array
+
+You are given an array of integers nums and the head of a linked list. Return the head of the modified linked list after removing all nodes from the linked list that have a value that exists in nums.
+
+Constraints:
+
+1 <= nums.length <= 10^5
+1 <= nums[i] <= 10^5
+All elements in nums are unique.
+The number of nodes in the given list is in the range [1, 10^5].
+1 <= Node.val <= 10^5
+The input is generated such that there is at least one node in the linked list that has a value not present in nums.
+
+# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+    def modifiedList(nums, head):
+        """"""
+        :type nums: List[int]
+        :type head: Optional[ListNode]
+        :rtype: Optional[ListNode]
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Delete Nodes From Linked List Present in Array
+
+You are given an array of integers nums and the head of a linked list. Return the head of the modified linked list after removing all nodes from the linked list that have a value that exists in nums. ","Constraints:
+
+1 <= nums.length <= 10^5
+1 <= nums[i] <= 10^5
+All elements in nums are unique.
+The number of nodes in the given list is in the range [1, 10^5].
+1 <= Node.val <= 10^5
+The input is generated such that there is at least one node in the linked list that has a value not present in nums.","# Definition for singly-linked list.
+# class ListNode(object):
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+    def modifiedList(nums, head):
+        """"""
+        :type nums: List[int]
+        :type head: Optional[ListNode]
+        :rtype: Optional[ListNode]
+        """"""
+        ","Example 1:
+
+Input: nums = [1,2,3], head = [1,2,3,4,5]
+
+Output: [4,5]
+
+Explanation:
+
+
+
+Remove the nodes with values 1, 2, and 3.
+
+Example 2:
+
+Input: nums = [1], head = [1,2,1,2,1,2]
+
+Output: [2,2,2]
+
+Explanation:
+
+
+
+Remove the nodes with value 1.
+
+Example 3:
+
+Input: nums = [5], head = [1,2,3,4]
+
+Output: [1,2,3,4]
+
+Explanation:
+
+
+
+No node has value 5.
+
+ ","# Definition for singly-linked list.
+class ListNode(object):
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+class Solution(object):
+    def modifiedList(self, nums, head):
+        """"""
+        :type nums: List[int]
+        :type head: Optional[ListNode]
+        :rtype: Optional[ListNode]
+        """"""
+        # Convert nums list to a set for O(1) average time complexity checks
+        nums_set = set(nums)
+        
+        # Initialize a dummy node to handle edge cases easily
+        dummy = ListNode(0)
+        dummy.next = head
+        current = dummy
+        
+        # Traverse the list and remove nodes whose values are in nums_set
+        while current and current.next:
+            if current.next.val in nums_set:
+                current.next = current.next.next
+            else:
+                current = current.next
+        
+        return dummy.next
+
+# Helper function to create linked list from list
+def create_linked_list(arr):
+    if not arr:
+        return None
+    head = ListNode(arr[0])
+    current = head
+    for val in arr[1:]:
+        current.next = ListNode(val)
+        current = current.next
+    return head
+
+# Helper function to convert linked list to list
+def linked_list_to_list(head):
+    result = []
+    current = head
+    while current:
+        result.append(current.val)
+        current = current.next
+    return result",49,12,2,2,0,"[[1,2,3], [1,2,3,4,5]]","[4,5]","[[1], [1,2,1,2,1,2]]","[2,2,2]","[[5], [1,2,3,4]]","[1,2,3,4]"
+3218,20,Minimum Cost For Cutting Cake I,https://leetcode.com/problems/minimum-cost-for-cutting-cake-i/description/,Medium,23900,41500,0.576,140,7,45,0.952,"Array, Dynamic Programming, Greedy, Sorting","Can you write python 2 code to solve this problem using the code snippet below: Minimum Cost for Cutting Cake I
+
+There is an m x n cake that needs to be cut into 1 x 1 pieces.
+
+You are given integers m, n, and two arrays:
+
+horizontalCut of size m - 1, where horizontalCut[i] represents the cost to cut along the horizontal line i.
+verticalCut of size n - 1, where verticalCut[j] represents the cost to cut along the vertical line j.
+In one operation, you can choose any piece of cake that is not yet a 1 x 1 square and perform one of the following cuts:
+
+Cut along a horizontal line i at a cost of horizontalCut[i].
+Cut along a vertical line j at a cost of verticalCut[j].
+After the cut, the piece of cake is divided into two distinct pieces.
+
+The cost of a cut depends only on the initial cost of the line and does not change.
+
+Return the minimum total cost to cut the entire cake into 1 x 1 pieces.
+
+Constraints:
+
+1 <= m, n <= 20
+horizontalCut.length == m - 1
+verticalCut.length == n - 1
+1 <= horizontalCut[i], verticalCut[i] <= 103
+
+    def minimumCost(m, n, horizontalCut, verticalCut):
+        """"""
+        :type m: int
+        :type n: int
+        :type horizontalCut: List[int]
+        :type verticalCut: List[int]
+        :rtype: int
+        """"""
+","Can you write python 2 code to solve this problem using the code snippet below: Minimum Cost for Cutting Cake I
+
+There is an m x n cake that needs to be cut into 1 x 1 pieces.
+
+You are given integers m, n, and two arrays:
+
+horizontalCut of size m - 1, where horizontalCut[i] represents the cost to cut along the horizontal line i.
+verticalCut of size n - 1, where verticalCut[j] represents the cost to cut along the vertical line j.
+In one operation, you can choose any piece of cake that is not yet a 1 x 1 square and perform one of the following cuts:
+
+Cut along a horizontal line i at a cost of horizontalCut[i].
+Cut along a vertical line j at a cost of verticalCut[j].
+After the cut, the piece of cake is divided into two distinct pieces.
+
+The cost of a cut depends only on the initial cost of the line and does not change.
+
+Return the minimum total cost to cut the entire cake into 1 x 1 pieces. ","Constraints:
+
+1 <= m, n <= 20
+horizontalCut.length == m - 1
+verticalCut.length == n - 1
+1 <= horizontalCut[i], verticalCut[i] <= 103","def minimumCost(m, n, horizontalCut, verticalCut):
+        """"""
+        :type m: int
+        :type n: int
+        :type horizontalCut: List[int]
+        :type verticalCut: List[int]
+        :rtype: int
+        """"""","Example 1:
+
+Input: m = 3, n = 2, horizontalCut = [1,3], verticalCut = [5]
+
+Output: 13
+
+Explanation:
+
+
+
+Perform a cut on the vertical line 0 with cost 5, current total cost is 5.
+Perform a cut on the horizontal line 0 on 3 x 1 subgrid with cost 1.
+Perform a cut on the horizontal line 0 on 3 x 1 subgrid with cost 1.
+Perform a cut on the horizontal line 1 on 2 x 1 subgrid with cost 3.
+Perform a cut on the horizontal line 1 on 2 x 1 subgrid with cost 3.
+The total cost is 5 + 1 + 1 + 3 + 3 = 13.
+
+Example 2:
+
+Input: m = 2, n = 2, horizontalCut = [7], verticalCut = [4]
+
+Output: 15
+
+Explanation:
+
+Perform a cut on the horizontal line 0 with cost 7.
+Perform a cut on the vertical line 0 on 1 x 2 subgrid with cost 4.
+Perform a cut on the vertical line 0 on 1 x 2 subgrid with cost 4.
+The total cost is 7 + 4 + 4 = 15.
+
+ ","import heapq
+
+class Solution(object):
+    def minimumCost(self, m, n, horizontalCut, verticalCut):
+        """"""
+        :type m: int
+        :type n: int
+        :type horizontalCut: List[int]
+        :type verticalCut: List[int]
+        :rtype: int
+        """"""
+        # Sort the cuts in descending order
+        horizontalCut.sort(reverse=True)
+        verticalCut.sort(reverse=True)
+        
+        # Initialize variables
+        total_cost = 0
+        horizontal_parts = 1
+        vertical_parts = 1
+        
+        i = 0
+        j = 0
+        
+        # Use a greedy approach to always pick the maximum remaining cut
+        while i < len(horizontalCut) and j < len(verticalCut):
+            if horizontalCut[i] >= verticalCut[j]:
+                total_cost += horizontalCut[i] * vertical_parts
+                horizontal_parts += 1
+                i += 1
+            else:
+                total_cost += verticalCut[j] * horizontal_parts
+                vertical_parts += 1
+                j += 1
+        
+        # If there are remaining horizontal cuts
+        while i < len(horizontalCut):
+            total_cost += horizontalCut[i] * vertical_parts
+            i += 1
+        
+        # If there are remaining vertical cuts
+        while j < len(verticalCut):
+            total_cost += verticalCut[j] * horizontal_parts
+            j += 1
+        
+        return total_cost",45,10,6,2,1,"[3, 2, [1,3], [5]]",13,"[2, 2, [7], [4]]",15,"[6, 4, [2,6,5,9,4], [5,3,2]]",81
+1000,21,Minimum Cost To Merge Stones,https://leetcode.com/problems/minimum-cost-to-merge-stones/description/,Hard,40300,93200,0.432,2500,110,11,0.958,"Array, Dynamic Programming, Prefix Sum","Can you write python 2 code to solve this problem using the code snippet below: Minimum Cost to Merge Stones
+
+There are n piles of stones arranged in a row. The ith pile has stones[i] stones.
+
+A move consists of merging exactly k consecutive piles into one pile, and the cost of this move is equal to the total number of stones in these k piles.
+
+Return the minimum cost to merge all piles of stones into one pile. If it is impossible, return -1.
+
+Constraints:
+
+n == stones.length
+1 <= n <= 30
+1 <= stones[i] <= 100
+2 <= k <= 30
+
+    def mergeStones(stones, k):
+        """"""
+        :type stones: List[int]
+        :type k: int
+        :rtype: int
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Minimum Cost to Merge Stones
+
+There are n piles of stones arranged in a row. The ith pile has stones[i] stones.
+
+A move consists of merging exactly k consecutive piles into one pile, and the cost of this move is equal to the total number of stones in these k piles.
+
+Return the minimum cost to merge all piles of stones into one pile. If it is impossible, return -1. ","Constraints:
+
+n == stones.length
+1 <= n <= 30
+1 <= stones[i] <= 100
+2 <= k <= 30
+","def mergeStones(stones, k):
+        """"""
+        :type stones: List[int]
+        :type k: int
+        :rtype: int
+        """"""
+        ","Example 1:
+
+Input: stones = [3,2,4,1], k = 2
+Output: 20
+Explanation: We start with [3, 2, 4, 1].
+We merge [3, 2] for a cost of 5, and we are left with [5, 4, 1].
+We merge [4, 1] for a cost of 5, and we are left with [5, 5].
+We merge [5, 5] for a cost of 10, and we are left with [10].
+The total cost was 20, and this is the minimum possible.
+Example 2:
+
+Input: stones = [3,2,4,1], k = 3
+Output: -1
+Explanation: After any merge operation, there are 2 piles left, and we can't merge anymore.  So the task is impossible.
+Example 3:
+
+Input: stones = [3,5,1,2,6], k = 3
+Output: 25
+Explanation: We start with [3, 5, 1, 2, 6].
+We merge [5, 1, 2] for a cost of 8, and we are left with [3, 8, 6].
+We merge [3, 8, 6] for a cost of 17, and we are left with [17].
+The total cost was 25, and this is the minimum possible.
+ ","class Solution(object):
+    def mergeStones(self, stones, k):
+        """"""
+        :type stones: List[int]
+        :type k: int
+        :rtype: int
+        """"""
+        n = len(stones)
+        
+        if (n - 1) % (k - 1) != 0:
+            return -1
+        
+        # Prefix sum to calculate the sum of any subarray quickly
+        prefix_sum = [0] * (n + 1)
+        for i in range(n):
+            prefix_sum[i + 1] = prefix_sum[i] + stones[i]
+        
+        # dp[i][j][t] means the minimum cost needed to merge stones[i:j+1] into t piles
+        dp = [[[float('inf')] * (k + 1) for _ in range(n)] for _ in range(n)]
+        
+        # Base case: The cost to merge one pile is 0
+        for i in range(n):
+            dp[i][i][1] = 0
+        
+        # Process all subarray lengths
+        for length in range(2, n + 1):
+            for i in range(n - length + 1):
+                j = i + length - 1
+                # Update dp[i][j][t] for all possible t
+                for t in range(2, k + 1):
+                    for m in range(i, j, k - 1):
+                        dp[i][j][t] = min(dp[i][j][t], dp[i][m][1] + dp[m + 1][j][t - 1])
+                # If we can merge these stones into one pile
+                dp[i][j][1] = dp[i][j][k] + prefix_sum[j + 1] - prefix_sum[i] if dp[i][j][k] != float('inf') else dp[i][j][1]
+        
+        return dp[0][n - 1][1] if dp[0][n - 1][1] != float('inf') else -1",36,12,13,4,0,"[[3,2,4,1], 2]",20,"[[3,2,4,1], 3]",-1,"[[3,5,1,2,6], 3]",25
+1001,22,Grid Illumination,https://leetcode.com/problems/grid-illumination/description/,Hard,21500,57900,0.371,611,154,11,0.799,"Array, Hash Table","Can you write python 2 code to solve this problem using the code snippet below: Grid Illumination
+
+There is a 2D grid of size n x n where each cell of this grid has a lamp that is initially turned off.
+
+You are given a 2D array of lamp positions lamps, where lamps[i] = [rowi, coli] indicates that the lamp at grid[rowi][coli] is turned on. Even if the same lamp is listed more than once, it is turned on.
+
+When a lamp is turned on, it illuminates its cell and all other cells in the same row, column, or diagonal.
+
+You are also given another 2D array queries, where queries[j] = [rowj, colj]. For the jth query, determine whether grid[rowj][colj] is illuminated or not. After answering the jth query, turn off the lamp at grid[rowj][colj] and its 8 adjacent lamps if they exist. A lamp is adjacent if its cell shares either a side or corner with grid[rowj][colj].
+
+Return an array of integers ans, where ans[j] should be 1 if the cell in the jth query was illuminated, or 0 if the lamp was not.
+
+Constraints:
+
+1 <= n <= 10^9
+0 <= lamps.length <= 20000
+0 <= queries.length <= 20000
+lamps[i].length == 2
+0 <= rowi, coli < n
+queries[j].length == 2
+0 <= rowj, colj < n
+
+    def gridIllumination(n, lamps, queries):
+        """"""
+        :type n: int
+        :type lamps: List[List[int]]
+        :type queries: List[List[int]]
+        :rtype: List[int]
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Grid Illumination
+
+There is a 2D grid of size n x n where each cell of this grid has a lamp that is initially turned off.
+
+You are given a 2D array of lamp positions lamps, where lamps[i] = [rowi, coli] indicates that the lamp at grid[rowi][coli] is turned on. Even if the same lamp is listed more than once, it is turned on.
+
+When a lamp is turned on, it illuminates its cell and all other cells in the same row, column, or diagonal.
+
+You are also given another 2D array queries, where queries[j] = [rowj, colj]. For the jth query, determine whether grid[rowj][colj] is illuminated or not. After answering the jth query, turn off the lamp at grid[rowj][colj] and its 8 adjacent lamps if they exist. A lamp is adjacent if its cell shares either a side or corner with grid[rowj][colj].
+
+Return an array of integers ans, where ans[j] should be 1 if the cell in the jth query was illuminated, or 0 if the lamp was not. ","Constraints:
+
+1 <= n <= 10^9
+0 <= lamps.length <= 20000
+0 <= queries.length <= 20000
+lamps[i].length == 2
+0 <= rowi, coli < n
+queries[j].length == 2
+0 <= rowj, colj < n","  def gridIllumination(n, lamps, queries):
+        """"""
+        :type n: int
+        :type lamps: List[List[int]]
+        :type queries: List[List[int]]
+        :rtype: List[int]
+        """"""","Example 1:
+
+Input: n = 5, lamps = [[0,0],[4,4]], queries = [[1,1],[1,0]]
+Output: [1,0]
+Explanation: We have the initial grid with all lamps turned off. In the above picture we see the grid after turning on the lamp at grid[0][0] then turning on the lamp at grid[4][4].
+The 0th query asks if the lamp at grid[1][1] is illuminated or not (the blue square). It is illuminated, so set ans[0] = 1. Then, we turn off all lamps in the red square.
+
+The 1st query asks if the lamp at grid[1][0] is illuminated or not (the blue square). It is not illuminated, so set ans[1] = 0. Then, we turn off all lamps in the red rectangle.
+
+Example 2:
+
+Input: n = 5, lamps = [[0,0],[4,4]], queries = [[1,1],[1,1]]
+Output: [1,1]
+Example 3:
+
+Input: n = 5, lamps = [[0,0],[0,4]], queries = [[0,4],[0,1],[1,4]]
+Output: [1,1,0]
+ 
+","class Solution(object):
+    def gridIllumination(self, n, lamps, queries):
+        """"""
+        :type n: int
+        :type lamps: List[List[int]]
+        :type queries: List[List[int]]
+        :rtype: List[int]
+        """"""
+        from collections import defaultdict
+        
+        # Directions for turning off adjacent lamps
+        directions = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1, 1)]
+        
+        # Keeping track of the illuminated rows, columns, and diagonals
+        row_count = defaultdict(int)
+        col_count = defaultdict(int)
+        diag1_count = defaultdict(int)
+        diag2_count = defaultdict(int)
+        
+        # Lamp set to keep track of active lamps
+        lamp_set = set()
+        
+        for lamp in lamps:
+            r, c = lamp
+            if (r, c) in lamp_set:
+                continue
+            lamp_set.add((r, c))
+            row_count[r] += 1
+            col_count[c] += 1
+            diag1_count[r - c] += 1
+            diag2_count[r + c] += 1
+        
+        result = []
+        
+        for query in queries:
+            r, c = query
+            if row_count[r] > 0 or col_count[c] > 0 or diag1_count[r - c] > 0 or diag2_count[r + c] > 0:
+                result.append(1)
+            else:
+                result.append(0)
+            
+            # Turn off the lamp and adjacent lamps
+            for dr, dc in directions:
+                nr, nc = r + dr, c + dc
+                if (nr, nc) in lamp_set:
+                    lamp_set.remove((nr, nc))
+                    row_count[nr] -= 1
+                    col_count[nc] -= 1
+                    diag1_count[nr - nc] -= 1
+                    diag2_count[nr + nc] -= 1
+        
+        return result
+",53,20,7,3,1,"[5, [[0,0],[4,4]], [[1,1],[1,0]]]","[1,0]","[5, [[0,0],[4,4]], [[1,1],[1,1]]]","[1,1]","[5, [[0,0],[0,4]], [[0,4],[0,1],[1,4]]]","[1,1,0]"
+1499,23,Max Value Of Equation,https://leetcode.com/problems/max-value-of-equation/description/,Hard,44200,100300,0.441,1300,59,7,0.957,"Array, Queue, Sliding Window, Heap (Priority Queue), Monotonic Queue","Can you write python 2 code to solve this problem using the code snippet below: Max Value of Equation
+
+You are given an array points containing the coordinates of points on a 2D plane, sorted by the x-values, where points[i] = [xi, yi] such that xi < xj for all 1 <= i < j <= points.length. You are also given an integer k.
+
+Return the maximum value of the equation yi + yj + |xi - xj| where |xi - xj| <= k and 1 <= i < j <= points.length.
+
+It is guaranteed that there exists at least one pair of points that satisfy the constraint |xi - xj| <= k. 
+
+Constraints:
+
+2 <= points.length <= 10^5
+points[i].length == 2
+-10^8 <= xi, yi <= 10^8
+0 <= k <= 2 * 10^8
+xi < xj for all 1 <= i < j <= points.length
+xi form a strictly increasing sequence.
+
+    def findMaxValueOfEquation(points, k):
+        """"""
+        :type points: List[List[int]]
+        :type k: int
+        :rtype: int
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Max Value of Equation
+
+You are given an array points containing the coordinates of points on a 2D plane, sorted by the x-values, where points[i] = [xi, yi] such that xi < xj for all 1 <= i < j <= points.length. You are also given an integer k.
+
+Return the maximum value of the equation yi + yj + |xi - xj| where |xi - xj| <= k and 1 <= i < j <= points.length.
+
+It is guaranteed that there exists at least one pair of points that satisfy the constraint |xi - xj| <= k. ","Constraints:
+
+2 <= points.length <= 10^5
+points[i].length == 2
+-10^8 <= xi, yi <= 10^8
+0 <= k <= 2 * 10^8
+xi < xj for all 1 <= i < j <= points.length
+xi form a strictly increasing sequence.","def findMaxValueOfEquation(points, k):
+        """"""
+        :type points: List[List[int]]
+        :type k: int
+        :rtype: int
+        """"""","Example 1:
+
+Input: points = [[1,3],[2,0],[5,10],[6,-10]], k = 1
+Output: 4
+Explanation: The first two points satisfy the condition |xi - xj| <= 1 and if we calculate the equation we get 3 + 0 + |1 - 2| = 4. Third and fourth points also satisfy the condition and give a value of 10 + -10 + |5 - 6| = 1.
+No other pairs satisfy the condition, so we return the max of 4 and 1.
+Example 2:
+
+Input: points = [[0,0],[3,0],[9,2]], k = 3
+Output: 3
+Explanation: Only the first two points have an absolute difference of 3 or less in the x-values, and give the value of 0 + 0 + |0 - 3| = 3.","import heapq
+
+class Solution(object):
+    def findMaxValueOfEquation(self, points, k):
+        """"""
+        :type points: List[List[int]]
+        :type k: int
+        :rtype: int
+        """"""
+        # Initialize a max heap
+        max_heap = []
+        # Initialize the result as negative infinity
+        result = float('-inf')
+        
+        for x, y in points:
+            # Remove points from the heap that do not satisfy the condition |xi - xj| <= k
+            while max_heap and x - max_heap[0][1] > k:
+                heapq.heappop(max_heap)
+            
+            # If the heap is not empty, calculate the possible result
+            if max_heap:
+                result = max(result, y + x + (-max_heap[0][0]))
+            
+            # Push the current point (yi - xi, xi) onto the heap
+            heapq.heappush(max_heap, (-(y - x), x))
+        
+        return result",27,8,2,2,1,"[[[1,3],[2,0],[5,10],[6,-10]], 1]",4,"[[[0,0],[3,0],[9,2]], 3]",3,"[[[1,4],[3,0],[5,11],[6,-11]], 2]",13
+1585,24,Check If String Is Transformable With Substring Sort Operations,https://leetcode.com/problems/check-if-string-is-transformable-with-substring-sort-operations/description/,Hard,8700,17900,0.486,438,7,5,0.984,"String, Greedy, Sorting","Can you write python 2 code to solve this problem using the code snippet below: Check If String Is Transformable With Substring Sort Operations
+
+Given two strings s and t, transform string s into string t using the following operation any number of times:
+
+Choose a non-empty substring in s and sort it in place so the characters are in ascending order.
+For example, applying the operation on the underlined substring in ""14234"" results in ""12344"".
+Return true if it is possible to transform s into t. Otherwise, return false.
+
+A substring is a contiguous sequence of characters within a string.
+
+ 
+
+Constraints:
+
+s.length == t.length
+1 <= s.length <= 105
+s and t consist of only digits.
+
+    def isTransformable(s, t):
+        """"""
+        :type s: str
+        :type t: str
+        :rtype: bool
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Check If String Is Transformable With Substring Sort Operations
+
+Given two strings s and t, transform string s into string t using the following operation any number of times:
+
+Choose a non-empty substring in s and sort it in place so the characters are in ascending order.
+For example, applying the operation on the underlined substring in ""14234"" results in ""12344"".
+Return true if it is possible to transform s into t. Otherwise, return false.
+
+A substring is a contiguous sequence of characters within a string. ","Constraints:
+
+s.length == t.length
+1 <= s.length <= 105
+s and t consist of only digits.","def isTransformable(s, t):
+        """"""
+        :type s: str
+        :type t: str
+        :rtype: bool
+        """"""","Example 1:
+
+Input: s = ""84532"", t = ""34852""
+Output: true
+Explanation: You can transform s into t using the following sort operations:
+""84532"" (from index 2 to 3) -> ""84352""
+""84352"" (from index 0 to 2) -> ""34852""
+Example 2:
+
+Input: s = ""34521"", t = ""23415""
+Output: true
+Explanation: You can transform s into t using the following sort operations:
+""34521"" -> ""23451""
+""23451"" -> ""23415""
+Example 3:
+
+Input: s = ""12345"", t = ""12435""
+Output: false
+ ","class Solution(object):
+    def isTransformable(self, s, t):
+        """"""
+        :type s: str
+        :type t: str
+        :rtype: bool
+        """"""
+        from collections import defaultdict, deque
+        
+        # Create a dictionary to hold the indices of each digit in s
+        pos = defaultdict(deque)
+        
+        # Fill the dictionary with indices of each digit in s
+        for i, char in enumerate(s):
+            pos[char].append(i)
+        
+        # Iterate through each character in t
+        for char in t:
+            if not pos[char]:
+                return False
+            
+            # Get the index of the current character in s
+            index = pos[char].popleft()
+            
+            # Check if there are any smaller digits in s before the current character's position
+            for smaller_char in range(int(char)):
+                if pos[str(smaller_char)] and pos[str(smaller_char)][0] < index:
+                    return False
+        
+        return True",30,10,4,4,2,"[84532, 34852]",TRUE,"[34521, 23415]",TRUE,"[12345, 12435]",FALSE
+1691,25,Maximum Height By Stacking Cuboids,https://leetcode.com/problems/maximum-height-by-stacking-cuboids/description/,Hard,29600,51200,0.578,1100,33,13,0.971,"Array, Dynamic Programming, Sorting","Can you write python 2 code to solve this problem using the code snippet below: Maximum Height by Stacking Cuboids 
+
+Given n cuboids where the dimensions of the ith cuboid is cuboids[i] = [widthi, lengthi, heighti] (0-indexed). Choose a subset of cuboids and place them on each other.
+
+You can place cuboid i on cuboid j if widthi <= widthj and lengthi <= lengthj and heighti <= heightj. You can rearrange any cuboid's dimensions by rotating it to put it on another cuboid.
+
+Return the maximum height of the stacked cuboids.
+ 
+Constraints:
+
+n == cuboids.length
+1 <= n <= 100
+1 <= widthi, lengthi, heighti <= 100
+
+    def maxHeight(cuboids):
+        """"""
+        :type cuboids: List[List[int]]
+        :rtype: int
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below:  Maximum Height by Stacking Cuboids 
+
+Given n cuboids where the dimensions of the ith cuboid is cuboids[i] = [widthi, lengthi, heighti] (0-indexed). Choose a subset of cuboids and place them on each other.
+
+You can place cuboid i on cuboid j if widthi <= widthj and lengthi <= lengthj and heighti <= heightj. You can rearrange any cuboid's dimensions by rotating it to put it on another cuboid.
+
+Return the maximum height of the stacked cuboids. ","Constraints:
+
+n == cuboids.length
+1 <= n <= 100
+1 <= widthi, lengthi, heighti <= 100
+","def maxHeight(cuboids):
+        """"""
+        :type cuboids: List[List[int]]
+        :rtype: int
+        """"""","Example 1:
+
+Input: cuboids = [[50,45,20],[95,37,53],[45,23,12]]
+Output: 190
+Explanation:
+Cuboid 1 is placed on the bottom with the 53x37 side facing down with height 95.
+Cuboid 0 is placed next with the 45x20 side facing down with height 50.
+Cuboid 2 is placed next with the 23x12 side facing down with height 45.
+The total height is 95 + 50 + 45 = 190.
+Example 2:
+
+Input: cuboids = [[38,25,45],[76,35,3]]
+Output: 76
+Explanation:
+You can't place any of the cuboids on the other.
+We choose cuboid 1 and rotate it so that the 35x3 side is facing down and its height is 76.
+Example 3:
+
+Input: cuboids = [[7,11,17],[7,17,11],[11,7,17],[11,17,7],[17,7,11],[17,11,7]]
+Output: 102
+Explanation:
+After rearranging the cuboids, you can see that all cuboids have the same dimension.
+You can place the 11x7 side down on all cuboids so their heights are 17.
+The maximum height of stacked cuboids is 6 * 17 = 102.
+ 
+","class Solution(object):
+    def maxHeight(self, cuboids):
+        """"""
+        :type cuboids: List[List[int]]
+        :rtype: int
+        """"""
+        # Sort dimensions of each cuboid so that width <= length <= height
+        for cuboid in cuboids:
+            cuboid.sort()
+        
+        # Sort all cuboids based on width, length and then height
+        cuboids.sort()
+
+        # Initialize the dp array where dp[i] will store the maximum height ending with the ith cuboid
+        dp = [0] * len(cuboids)
+        
+        for i in range(len(cuboids)):
+            dp[i] = cuboids[i][2]  # Initialize with the height of the current cuboid
+
+            for j in range(i):
+                # Check if cuboid j can be placed on cuboid i
+                if (cuboids[j][0] <= cuboids[i][0] and
+                    cuboids[j][1] <= cuboids[i][1] and
+                    cuboids[j][2] <= cuboids[i][2]):
+                    dp[i] = max(dp[i], dp[j] + cuboids[i][2])
+        
+        # The maximum height will be the maximum value in the dp array
+        return max(dp)",28,6,8,4,0,"[[[50,45,20],[95,37,53],[45,23,12]]]",190,"[[[38,25,45],[76,35,3]]]",76,"[[[7,11,17],[7,17,11],[11,7,17],[11,17,7],[17,7,11],[17,11,7]]]",102
+2076,26,Process Restricted Friend Requests,https://leetcode.com/problems/process-restricted-friend-requests/description/,Hard,17500,31700,0.552,612,14,2,0.978,"Union Find, Graph","Can you write python 2 code to solve this problem using the code snippet below: Process Restricted Friend Requests
+
+You are given an integer n indicating the number of people in a network. Each person is labeled from 0 to n - 1.
+
+You are also given a 0-indexed 2D integer array restrictions, where restrictions[i] = [xi, yi] means that person xi and person yi cannot become friends, either directly or indirectly through other people.
+
+Initially, no one is friends with each other. You are given a list of friend requests as a 0-indexed 2D integer array requests, where requests[j] = [uj, vj] is a friend request between person uj and person vj.
+
+A friend request is successful if uj and vj can be friends. Each friend request is processed in the given order (i.e., requests[j] occurs before requests[j + 1]), and upon a successful request, uj and vj become direct friends for all future friend requests.
+
+Return a boolean array result, where each result[j] is true if the jth friend request is successful or false if it is not.
+
+Note: If uj and vj are already direct friends, the request is still successful.
+
+Constraints:
+
+2 <= n <= 1000
+0 <= restrictions.length <= 1000
+restrictions[i].length == 2
+0 <= xi, yi <= n - 1
+xi != yi
+1 <= requests.length <= 1000
+requests[j].length == 2
+0 <= uj, vj <= n - 1
+uj != vj
+
+    def friendRequests(n, restrictions, requests):
+        """"""
+        :type n: int
+        :type restrictions: List[List[int]]
+        :type requests: List[List[int]]
+        :rtype: List[bool]
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Process Restricted Friend Requests
+
+You are given an integer n indicating the number of people in a network. Each person is labeled from 0 to n - 1.
+
+You are also given a 0-indexed 2D integer array restrictions, where restrictions[i] = [xi, yi] means that person xi and person yi cannot become friends, either directly or indirectly through other people.
+
+Initially, no one is friends with each other. You are given a list of friend requests as a 0-indexed 2D integer array requests, where requests[j] = [uj, vj] is a friend request between person uj and person vj.
+
+A friend request is successful if uj and vj can be friends. Each friend request is processed in the given order (i.e., requests[j] occurs before requests[j + 1]), and upon a successful request, uj and vj become direct friends for all future friend requests.
+
+Return a boolean array result, where each result[j] is true if the jth friend request is successful or false if it is not.
+
+Note: If uj and vj are already direct friends, the request is still successful. ","Constraints:
+
+2 <= n <= 1000
+0 <= restrictions.length <= 1000
+restrictions[i].length == 2
+0 <= xi, yi <= n - 1
+xi != yi
+1 <= requests.length <= 1000
+requests[j].length == 2
+0 <= uj, vj <= n - 1
+uj != vj","    def friendRequests(n, restrictions, requests):
+        """"""
+        :type n: int
+        :type restrictions: List[List[int]]
+        :type requests: List[List[int]]
+        :rtype: List[bool]
+        """"""","Example 1:
+
+Input: n = 3, restrictions = [[0,1]], requests = [[0,2],[2,1]]
+Output: [true,false]
+Explanation:
+Request 0: Person 0 and person 2 can be friends, so they become direct friends. 
+Request 1: Person 2 and person 1 cannot be friends since person 0 and person 1 would be indirect friends (1--2--0).
+Example 2:
+
+Input: n = 3, restrictions = [[0,1]], requests = [[1,2],[0,2]]
+Output: [true,false]
+Explanation:
+Request 0: Person 1 and person 2 can be friends, so they become direct friends.
+Request 1: Person 0 and person 2 cannot be friends since person 0 and person 1 would be indirect friends (0--2--1).
+Example 3:
+
+Input: n = 5, restrictions = [[0,1],[1,2],[2,3]], requests = [[0,4],[1,2],[3,1],[3,4]]
+Output: [true,false,true,false]
+Explanation:
+Request 0: Person 0 and person 4 can be friends, so they become direct friends.
+Request 1: Person 1 and person 2 cannot be friends since they are directly restricted.
+Request 2: Person 3 and person 1 can be friends, so they become direct friends.
+Request 3: Person 3 and person 4 cannot be friends since person 0 and person 1 would be indirect friends (0--4--3--1).
+ 
+","class Solution(object):
+    def friendRequests(self, n, restrictions, requests):
+        """"""
+        :type n: int
+        :type restrictions: List[List[int]]
+        :type requests: List[List[int]]
+        :rtype: List[bool]
+        """"""
+        parent = list(range(n))
+        rank = [1] * n
+        
+        def find(x):
+            if parent[x] != x:
+                parent[x] = find(parent[x])
+            return parent[x]
+        
+        def union(x, y):
+            rootX = find(x)
+            rootY = find(y)
+            if rootX != rootY:
+                if rank[rootX] > rank[rootY]:
+                    parent[rootY] = rootX
+                elif rank[rootX] < rank[rootY]:
+                    parent[rootX] = rootY
+                else:
+                    parent[rootY] = rootX
+                    rank[rootX] += 1
+        
+        def can_be_friends(u, v):
+            rootU = find(u)
+            rootV = find(v)
+            for x, y in restrictions:
+                rootX = find(x)
+                rootY = find(y)
+                if (rootU == rootX and rootV == rootY) or (rootU == rootY and rootV == rootX):
+                    return False
+            return True
+        
+        result = []
+        for u, v in requests:
+            if can_be_friends(u, v):
+                union(u, v)
+                result.append(True)
+            else:
+                result.append(False)
+        
+        return result",47,15,4,3,0,"[3, [[0,1]], [[0,2],[2,1]]]","[TRUE,FALSE]","[3, [[0,1]], [[1,2],[0,2]]]","[TRUE,FALSE]","[5, [[0,1],[1,2],[2,3]], [[0,4],[1,2],[3,1],[3,4]]]","[TRUE,FALSE,TRUE,FALSE]"
+2136,27,Earliest Possible Day Of Full Bloom,https://leetcode.com/problems/earliest-possible-day-of-full-bloom/description/,Hard,54700,76300,0.717,1600,81,17,0.952,"Array, Greedy, Sorting","Can you write python 2 code to solve this problem using the code snippet below: Earliest Possible Day of Full Bloom
+
+You have n flower seeds. Every seed must be planted first before it can begin to grow, then bloom. Planting a seed takes time and so does the growth of a seed. You are given two 0-indexed integer arrays plantTime and growTime, of length n each:
+
+plantTime[i] is the number of full days it takes you to plant the ith seed. Every day, you can work on planting exactly one seed. You do not have to work on planting the same seed on consecutive days, but the planting of a seed is not complete until you have worked plantTime[i] days on planting it in total.
+growTime[i] is the number of full days it takes the ith seed to grow after being completely planted. After the last day of its growth, the flower blooms and stays bloomed forever.
+From the beginning of day 0, you can plant the seeds in any order.
+
+Return the earliest possible day where all seeds are blooming.
+
+Constraints:
+
+n == plantTime.length == growTime.length
+1 <= n <= 10^5
+1 <= plantTime[i], growTime[i] <= 10^4
+
+    def earliestFullBloom(plantTime, growTime):
+        """"""
+        :type plantTime: List[int]
+        :type growTime: List[int]
+        :rtype: int
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Earliest Possible Day of Full Bloom
+
+You have n flower seeds. Every seed must be planted first before it can begin to grow, then bloom. Planting a seed takes time and so does the growth of a seed. You are given two 0-indexed integer arrays plantTime and growTime, of length n each:
+
+plantTime[i] is the number of full days it takes you to plant the ith seed. Every day, you can work on planting exactly one seed. You do not have to work on planting the same seed on consecutive days, but the planting of a seed is not complete until you have worked plantTime[i] days on planting it in total.
+growTime[i] is the number of full days it takes the ith seed to grow after being completely planted. After the last day of its growth, the flower blooms and stays bloomed forever.
+From the beginning of day 0, you can plant the seeds in any order.
+
+Return the earliest possible day where all seeds are blooming. ","Constraints:
+
+n == plantTime.length == growTime.length
+1 <= n <= 10^5
+1 <= plantTime[i], growTime[i] <= 10^4","    def earliestFullBloom(plantTime, growTime):
+        """"""
+        :type plantTime: List[int]
+        :type growTime: List[int]
+        :rtype: int
+        """"""","Example 1:
+
+Input: plantTime = [1,4,3], growTime = [2,3,1]
+Output: 9
+Explanation: The grayed out pots represent planting days, colored pots represent growing days, and the flower represents the day it blooms.
+One optimal way is:
+On day 0, plant the 0th seed. The seed grows for 2 full days and blooms on day 3.
+On days 1, 2, 3, and 4, plant the 1st seed. The seed grows for 3 full days and blooms on day 8.
+On days 5, 6, and 7, plant the 2nd seed. The seed grows for 1 full day and blooms on day 9.
+Thus, on day 9, all the seeds are blooming.
+Example 2:
+
+
+Input: plantTime = [1,2,3,2], growTime = [2,1,2,1]
+Output: 9
+Explanation: The grayed out pots represent planting days, colored pots represent growing days, and the flower represents the day it blooms.
+One optimal way is:
+On day 1, plant the 0th seed. The seed grows for 2 full days and blooms on day 4.
+On days 0 and 3, plant the 1st seed. The seed grows for 1 full day and blooms on day 5.
+On days 2, 4, and 5, plant the 2nd seed. The seed grows for 2 full days and blooms on day 8.
+On days 6 and 7, plant the 3rd seed. The seed grows for 1 full day and blooms on day 9.
+Thus, on day 9, all the seeds are blooming.
+Example 3:
+
+Input: plantTime = [1], growTime = [1]
+Output: 2
+Explanation: On day 0, plant the 0th seed. The seed grows for 1 full day and blooms on day 2.
+Thus, on day 2, all the seeds are blooming.
+ ","class Solution(object):
+    def earliestFullBloom(self, plantTime, growTime):
+        """"""
+        :type plantTime: List[int]
+        :type growTime: List[int]
+        :rtype: int
+        """"""
+        # Combine plantTime and growTime into a list of tuples
+        seeds = zip(plantTime, growTime)
+        
+        # Sort the seeds by growTime in descending order
+        seeds.sort(key=lambda x: -x[1])
+        
+        # Initialize current day and latest bloom day
+        current_day = 0
+        latest_bloom_day = 0
+        
+        # Iterate through each seed
+        for plant, grow in seeds:
+            # Plant the seed (increase the current day by plantTime)
+            current_day += plant
+            # Calculate the bloom day for this seed
+            bloom_day = current_day + grow
+            # Update the latest bloom day
+            latest_bloom_day = max(latest_bloom_day, bloom_day)
+        
+        # Return the latest bloom day
+        return latest_bloom_day",28,10,3,3,0,"[[1,4,3], [2,3,1]]",9,"[[1,2,3,2], [2,1,2,1]]",9,"[[1], [1]]",2
+2350,28,Shortest Impossible Sequence Of Rolls,https://leetcode.com/problems/shortest-impossible-sequence-of-rolls/description/,Hard,15100,22100,0.683,639,51,9,0.926,"Array, Hash Table, Greedy","Can you write python 2 code to solve this problem using the code snippet below: Shortest Impossible Sequence of Rolls
+
+You are given an integer array rolls of length n and an integer k. You roll a k sided dice numbered from 1 to k, n times, where the result of the ith roll is rolls[i].
+
+Return the length of the shortest sequence of rolls so that there's no such 
+subsequence
+ in rolls.
+
+A sequence of rolls of length len is the result of rolling a k sided dice len times.
+
+Constraints:
+
+n == rolls.length
+1 <= n <= 10^5
+1 <= rolls[i] <= k <= 10^5
+
+    def shortestSequence(rolls, k):
+        """"""
+        :type rolls: List[int]
+        :type k: int
+        :rtype: int
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Shortest Impossible Sequence of Rolls
+
+You are given an integer array rolls of length n and an integer k. You roll a k sided dice numbered from 1 to k, n times, where the result of the ith roll is rolls[i].
+
+Return the length of the shortest sequence of rolls so that there's no such 
+subsequence
+ in rolls.
+
+A sequence of rolls of length len is the result of rolling a k sided dice len times. ","Constraints:
+
+n == rolls.length
+1 <= n <= 10^5
+1 <= rolls[i] <= k <= 10^5"," def shortestSequence(rolls, k):
+        """"""
+        :type rolls: List[int]
+        :type k: int
+        :rtype: int
+        """"""","Example 1:
+
+Input: rolls = [4,2,1,2,3,3,2,4,1], k = 4
+Output: 3
+Explanation: Every sequence of rolls of length 1, [1], [2], [3], [4], can be taken from rolls.
+Every sequence of rolls of length 2, [1, 1], [1, 2], ..., [4, 4], can be taken from rolls.
+The sequence [1, 4, 2] cannot be taken from rolls, so we return 3.
+Note that there are other sequences that cannot be taken from rolls.
+Example 2:
+
+Input: rolls = [1,1,2,2], k = 2
+Output: 2
+Explanation: Every sequence of rolls of length 1, [1], [2], can be taken from rolls.
+The sequence [2, 1] cannot be taken from rolls, so we return 2.
+Note that there are other sequences that cannot be taken from rolls but [2, 1] is the shortest.
+Example 3:
+
+Input: rolls = [1,1,3,2,2,2,3,3], k = 4
+Output: 1
+Explanation: The sequence [4] cannot be taken from rolls, so we return 1.
+Note that there are other sequences that cannot be taken from rolls but [4] is the shortest.
+ 
+","class Solution(object):
+    def shortestSequence(self, rolls, k):
+        """"""
+        :type rolls: List[int]
+        :type k: int
+        :rtype: int
+        """"""
+        seen = set()
+        count = 0
+
+        for roll in rolls:
+            seen.add(roll)
+            if len(seen) == k:
+                count += 1
+                seen.clear()
+
+        return count + 1",17,6,2,2,0,"[[4,2,1,2,3,3,2,4,1], 4]",3,"[[1,1,2,2], 2]",2,"[[1,1,3,2,2,2,3,3], 4]",1
+2509,29,Cycle Length Queries In A Tree,https://leetcode.com/problems/cycle-length-queries-in-a-tree/description/,Hard,13200,23400,0.564,348,29,16,0.923,"Array, Tree, Binary Tree","Can you write python 2 code to solve this problem using the code snippet below: Cycle Length Queries in a Tree
+
+You are given an integer n. There is a complete binary tree with 2n - 1 nodes. The root of that tree is the node with the value 1, and every node with a value val in the range [1, 2n - 1 - 1] has two children where:
+
+The left node has the value 2 * val, and
+The right node has the value 2 * val + 1.
+You are also given a 2D integer array queries of length m, where queries[i] = [ai, bi]. For each query, solve the following problem:
+
+Add an edge between the nodes with values ai and bi.
+Find the length of the cycle in the graph.
+Remove the added edge between nodes with values ai and bi.
+Note that:
+
+A cycle is a path that starts and ends at the same node, and each edge in the path is visited only once.
+The length of a cycle is the number of edges visited in the cycle.
+There could be multiple edges between two nodes in the tree after adding the edge of the query.
+Return an array answer of length m where answer[i] is the answer to the ith query.
+
+ 
+Constraints:
+
+2 <= n <= 30
+m == queries.length
+1 <= m <= 10&5
+queries[i].length == 2
+1 <= ai, bi <= 2^n - 1
+ai != bi
+
+    def cycleLengthQueries(n, queries):
+        """"""
+        :type n: int
+        :type queries: List[List[int]]
+        :rtype: List[int]
+        """"""
+        
+
+","Can you write python 2 code to solve this problem using the code snippet below: Cycle Length Queries in a Tree
+
+You are given an integer n. There is a complete binary tree with 2n - 1 nodes. The root of that tree is the node with the value 1, and every node with a value val in the range [1, 2n - 1 - 1] has two children where:
+
+The left node has the value 2 * val, and
+The right node has the value 2 * val + 1.
+You are also given a 2D integer array queries of length m, where queries[i] = [ai, bi]. For each query, solve the following problem:
+
+Add an edge between the nodes with values ai and bi.
+Find the length of the cycle in the graph.
+Remove the added edge between nodes with values ai and bi.
+Note that:
+
+A cycle is a path that starts and ends at the same node, and each edge in the path is visited only once.
+The length of a cycle is the number of edges visited in the cycle.
+There could be multiple edges between two nodes in the tree after adding the edge of the query.
+Return an array answer of length m where answer[i] is the answer to the ith query. ","Constraints:
+
+2 <= n <= 30
+m == queries.length
+1 <= m <= 10&5
+queries[i].length == 2
+1 <= ai, bi <= 2^n - 1
+ai != bi","def cycleLengthQueries(n, queries):
+        """"""
+        :type n: int
+        :type queries: List[List[int]]
+        :rtype: List[int]
+        """"""","Example 1:
+
+Input: n = 3, queries = [[5,3],[4,7],[2,3]]
+Output: [4,5,3]
+Explanation: The diagrams above show the tree of 23 - 1 nodes. Nodes colored in red describe the nodes in the cycle after adding the edge.
+- After adding the edge between nodes 3 and 5, the graph contains a cycle of nodes [5,2,1,3]. Thus answer to the first query is 4. We delete the added edge and process the next query.
+- After adding the edge between nodes 4 and 7, the graph contains a cycle of nodes [4,2,1,3,7]. Thus answer to the second query is 5. We delete the added edge and process the next query.
+- After adding the edge between nodes 2 and 3, the graph contains a cycle of nodes [2,1,3]. Thus answer to the third query is 3. We delete the added edge.
+Example 2:
+
+
+Input: n = 2, queries = [[1,2]]
+Output: [2]
+Explanation: The diagram above shows the tree of 22 - 1 nodes. Nodes colored in red describe the nodes in the cycle after adding the edge.
+- After adding the edge between nodes 1 and 2, the graph contains a cycle of nodes [2,1]. Thus answer for the first query is 2. We delete the added edge.
+ 
+","class Solution(object):
+    def cycleLengthQueries(self, n, queries):
+        """"""
+        :type n: int
+        :type queries: List[List[int]]
+        :rtype: List[int]
+        """"""
+        def find_cycle_length(a, b):
+            path_a, path_b = [], []
+            while a:
+                path_a.append(a)
+                a //= 2
+            while b:
+                path_b.append(b)
+                b //= 2
+
+            # Reverse paths to start from the root
+            path_a.reverse()
+            path_b.reverse()
+
+            # Find the first common ancestor
+            i = 0
+            while i < len(path_a) and i < len(path_b) and path_a[i] == path_b[i]:
+                i += 1
+
+            # Length of the cycle is the length of both paths minus twice the length of the common path
+            return len(path_a) + len(path_b) - 2 * i + 1
+
+        result = []
+        for query in queries:
+            a, b = query
+            result.append(find_cycle_length(a, b))
+
+        return result",34,11,7,2,0,"[3, [[5,3],[4,7],[2,3]]]","[4,5,3]","[2, [[1,2]]]",[2],"[2, [[1,3], [2,3]]]","[2,3]"
+3219,30,Minimum Cost For Cutting Cake Ii,https://leetcode.com/problems/minimum-cost-for-cutting-cake-ii/description/,Hard,19200,34300,0.56,90,17,30,0.841,"Array, Greedy, Sorting","Can you write python 2 code to solve this problem using the code snippet below: Minimum Cost for Cutting Cake II
+
+There is an m x n cake that needs to be cut into 1 x 1 pieces.
+
+You are given integers m, n, and two arrays:
+
+horizontalCut of size m - 1, where horizontalCut[i] represents the cost to cut along the horizontal line i.
+verticalCut of size n - 1, where verticalCut[j] represents the cost to cut along the vertical line j.
+In one operation, you can choose any piece of cake that is not yet a 1 x 1 square and perform one of the following cuts:
+
+Cut along a horizontal line i at a cost of horizontalCut[i].
+Cut along a vertical line j at a cost of verticalCut[j].
+After the cut, the piece of cake is divided into two distinct pieces.
+
+The cost of a cut depends only on the initial cost of the line and does not change.
+
+Return the minimum total cost to cut the entire cake into 1 x 1 pieces.
+
+Constraints:
+
+1 <= m, n <= 10^5
+horizontalCut.length == m - 1
+verticalCut.length == n - 1
+1 <= horizontalCut[i], verticalCut[i] <= 10^3
+
+    def minimumCost(m, n, horizontalCut, verticalCut):
+        """"""
+        :type m: int
+        :type n: int
+        :type horizontalCut: List[int]
+        :type verticalCut: List[int]
+        :rtype: int
+        """"""
+        
+","Can you write python 2 code to solve this problem using the code snippet below: Minimum Cost for Cutting Cake II
+
+There is an m x n cake that needs to be cut into 1 x 1 pieces.
+
+You are given integers m, n, and two arrays:
+
+horizontalCut of size m - 1, where horizontalCut[i] represents the cost to cut along the horizontal line i.
+verticalCut of size n - 1, where verticalCut[j] represents the cost to cut along the vertical line j.
+In one operation, you can choose any piece of cake that is not yet a 1 x 1 square and perform one of the following cuts:
+
+Cut along a horizontal line i at a cost of horizontalCut[i].
+Cut along a vertical line j at a cost of verticalCut[j].
+After the cut, the piece of cake is divided into two distinct pieces.
+
+The cost of a cut depends only on the initial cost of the line and does not change.
+
+Return the minimum total cost to cut the entire cake into 1 x 1 pieces. ","Constraints:
+
+1 <= m, n <= 10^5
+horizontalCut.length == m - 1
+verticalCut.length == n - 1
+1 <= horizontalCut[i], verticalCut[i] <= 10^3","def minimumCost(m, n, horizontalCut, verticalCut):
+        """"""
+        :type m: int
+        :type n: int
+        :type horizontalCut: List[int]
+        :type verticalCut: List[int]
+        :rtype: int
+        """"""","Example 1:
+
+Input: m = 3, n = 2, horizontalCut = [1,3], verticalCut = [5]
+
+Output: 13
+
+Explanation:
+
+
+
+Perform a cut on the vertical line 0 with cost 5, current total cost is 5.
+Perform a cut on the horizontal line 0 on 3 x 1 subgrid with cost 1.
+Perform a cut on the horizontal line 0 on 3 x 1 subgrid with cost 1.
+Perform a cut on the horizontal line 1 on 2 x 1 subgrid with cost 3.
+Perform a cut on the horizontal line 1 on 2 x 1 subgrid with cost 3.
+The total cost is 5 + 1 + 1 + 3 + 3 = 13.
+
+Example 2:
+
+Input: m = 2, n = 2, horizontalCut = [7], verticalCut = [4]
+
+Output: 15
+
+Explanation:
+
+Perform a cut on the horizontal line 0 with cost 7.
+Perform a cut on the vertical line 0 on 1 x 2 subgrid with cost 4.
+Perform a cut on the vertical line 0 on 1 x 2 subgrid with cost 4.
+The total cost is 7 + 4 + 4 = 15.
+
+ 
+","class Solution(object):
+    def minimumCost(self, m, n, horizontalCut, verticalCut):
+        """"""
+        :type m: int
+        :type n: int
+        :type horizontalCut: List[int]
+        :type verticalCut: List[int]
+        :rtype: int
+        """"""
+        # Sort the cuts in descending order
+        horizontalCut.sort(reverse=True)
+        verticalCut.sort(reverse=True)
+        
+        # Initialize pointers for horizontal and vertical cuts
+        h, v = 0, 0
+        total_cost = 0
+        h_segments, v_segments = 1, 1
+        
+        # While there are still cuts to be made
+        while h < len(horizontalCut) and v < len(verticalCut):
+            if horizontalCut[h] >= verticalCut[v]:
+                total_cost += horizontalCut[h] * v_segments
+                h_segments += 1
+                h += 1
+            else:
+                total_cost += verticalCut[v] * h_segments
+                v_segments += 1
+                v += 1
+        
+        # Add the remaining horizontal cuts
+        while h < len(horizontalCut):
+            total_cost += horizontalCut[h] * v_segments
+            h += 1
+        
+        # Add the remaining vertical cuts
+        while v < len(verticalCut):
+            total_cost += verticalCut[v] * h_segments
+            v += 1
+        
+        return total_cost
+",41,10,6,2,0,"[3, 2, [1,3], [5]]",13,"[2, 2, [7], [4]]",15,"[2, 2, [7], [5]]",17
