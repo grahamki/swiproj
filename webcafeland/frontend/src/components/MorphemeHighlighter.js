@@ -83,7 +83,7 @@ const MorphemeHighlighter = () => {
     <div className="container">
       <div className="header">
         <h1>📚 Morpheme Highlighter</h1>
-        <p>Click on any word to see its morpheme breakdown and etymology</p>
+        <p>Highlight any word or section to break it down or summarize.</p>
       </div>
       
       <div className="content">
@@ -100,11 +100,15 @@ const MorphemeHighlighter = () => {
               <textarea
                 id="text-input"
                 className="text-input"
-                placeholder="Paste your text here to get started...&#10;&#10;Example: The disrespectfully behaved student was unbelievable in class."
+                placeholder="Paste or type your text here...&#10;&#10;Try highlighting a word to see its morphemes, or highlight a section for a summary."
                 value={text}
                 onChange={handleTextChange}
               />
             )}
+          </div>
+          
+          <div className="instructions">
+            💡 Highlight a word to see its morphemes — or highlight a section to get a summary.
           </div>
           
           <div className="button-group">
@@ -114,7 +118,7 @@ const MorphemeHighlighter = () => {
                   className="mode-button"
                   onClick={() => setIsEditMode(!isEditMode)}
                 >
-                  {isEditMode ? '📖 View Clickable Text' : '✏️ Edit Text'}
+                  {isEditMode ? '📖 Read!' : '✏️ Edit Text'}
                 </button>
                 <button 
                   className="clear-button"
@@ -154,7 +158,7 @@ const MorphemeHighlighter = () => {
             {loading && (
               <div className="loading">
                 <div className="spinner"></div>
-                <p>Analyzing word...</p>
+                <p>Analyzing word structure...</p>
               </div>
             )}
             
@@ -167,7 +171,7 @@ const MorphemeHighlighter = () => {
             {analysis && !loading && (
               <div className="analysis-content">
                 <div className="morpheme-breakdown">
-                  <h4>Morpheme Breakdown:</h4>
+                  <h4>📚 Morpheme Breakdown:</h4>
                   <div className="morphemes">
                     {analysis.prefix && (
                       <div className="morpheme prefix">
@@ -198,14 +202,14 @@ const MorphemeHighlighter = () => {
                 
                 {analysis.example && (
                   <div className="example">
-                    <h4>Example Sentence:</h4>
+                    <h4>💡 Example Usage:</h4>
                     <p>"{analysis.example}"</p>
                   </div>
                 )}
                 
                 {analysis.related && analysis.related.length > 0 && (
                   <div className="related-words">
-                    <h4>Related Words:</h4>
+                    <h4>🔗 Related Words:</h4>
                     <div className="word-list">
                       {analysis.related.map((word, index) => (
                         <span key={index} className="related-word">{word}</span>
