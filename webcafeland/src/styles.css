@@ -1,0 +1,26 @@
+/* ...existing code... */
+.related-section {
+  background: #f8f9fa;
+  border-left: 4px solid #6c63ff;
+  margin: 1.5em 0;
+  padding: 1em 1.5em;
+  border-radius: 6px;
+}
+
+.related-section h4 {
+  margin-top: 0;
+  color: #6c63ff;
+  font-weight: 600;
+}
+
+.related-section ul {
+  margin: 0.5em 0 0 1em;
+  padding: 0;
+  list-style-type: disc;
+}
+
+.related-section li {
+  margin-bottom: 0.3em;
+  font-size: 1em;
+}
+/* ...existing code... */

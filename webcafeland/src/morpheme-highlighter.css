@@ -1,0 +1,21 @@
+/* ...existing code... */
+
+/* Reduce top margin and padding for the modal */
+.morpheme-highlighter-modal {
+  margin-top: 12px !important;    /* Move modal closer to the top */
+  padding-top: 0 !important;
+}
+
+/* Reduce padding inside the modal content */
+.morpheme-highlighter-modal .modal-content {
+  padding-top: 12px !important;
+}
+
+/* Reduce header spacing */
+.morpheme-highlighter-modal .modal-header {
+  margin-bottom: 0.5em;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+}
+
+/* ...existing code... */
