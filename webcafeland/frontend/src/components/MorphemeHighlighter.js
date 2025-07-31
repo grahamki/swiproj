@@ -234,6 +234,22 @@ const MorphemeHighlighter = () => {
                       </div>
                     </div>
                   )}
+
+                  {analysis.graphemes && analysis.graphemes.length > 0 && (
+                    <div className="graphemes-section">
+                      <h4>📝 Grapheme Breakdown:</h4>
+                      <div className="graphemes-container">
+                        {analysis.graphemes.map((grapheme, idx) => (
+                          <div key={idx} className="grapheme-item">
+                            <span className="grapheme">{grapheme.grapheme}</span>
+                            <span className="ipa">{grapheme.ipa}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+
                 </div>
               )}
             </div>

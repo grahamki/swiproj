@@ -43,20 +43,23 @@ def analyze_word_with_ai(word):
 
 def analyze_with_anthropic(word):
     prompt = f"""
-Break the word \"{word}\" into morphemes and return the result as a JSON object. 
-You are a linguist AI that breaks down English words into morphemes and explains their meaning and origin.
+Break the word "{word}" into morphemes and graphemes, and return the result as a JSON object. 
+You are a linguist AI that breaks down English words into morphemes, graphemes, and explains their meaning, sound, and origin.
 
 Given a word, return a structured JSON object with the following fields:
 
 - "word": the original word
 - "morphemes": a list of objects, each with:
-  - "morpheme": the morpheme string (e.g. "un", "believe", "able")
+  - "morpheme": the morpheme string (e.g. "un", "believe", "able"). Please note the root should be a real word (e.g. "believe" not "believ").
   - "type": one of "prefix", "root", or "suffix"
   - "meaning": a brief definition
 - "meaning": a one-sentence overall definition of the word
 - "morphological_relatives": a list of words that share both the root and base (e.g. "believe", "believable", "disbelievable")
 - "etymological_relatives": a list of words that share the historical root only (e.g. "belief", "believer", "credence")
 - "historical_origin": a brief description of the word's origin and evolution
+- "graphemes": a list of objects, each with:
+  - "grapheme": the letter or group of letters representing a sound (e.g., "ph", "a", "th")
+  - "ipa": the corresponding IPA phonetic symbol (e.g., "f", "ə", "θ")
 
 ### Example:
 
@@ -73,9 +76,22 @@ Word: "unbelievable"
   "meaning": "Something that cannot be believed",
   "morphological_relatives": ["believable", "unbelievably", "disbelievable"],
   "etymological_relatives": ["belief", "believer", "credence"],
-  "historical_origin": "Old English, from Proto-Germanic *ga-laubjan, from PIE root *leubh- ('to care or believe')"
-}}
-```"""
+  "historical_origin": "Old English, from Proto-Germanic *ga-laubjan, from PIE root *leubh- ('to care or believe')",
+  "graphemes": [
+    {{ "grapheme": "u",  "ipa": "/ʌ/" }},
+    {{ "grapheme": "n",  "ipa": "/n/" }},
+    {{ "grapheme": "b",  "ipa": "/b/" }},
+    {{ "grapheme": "e",  "ipa": "/ɪ/" }},
+    {{ "grapheme": "l",  "ipa": "/l/" }},
+    {{ "grapheme": "ie", "ipa": "/iː/" }},
+    {{ "grapheme": "v",  "ipa": "/v/" }},
+    {{ "grapheme": "a",  "ipa": "/ə/" }},
+    {{ "grapheme": "b",  "ipa": "/b/" }},
+    {{ "grapheme": "le", "ipa": "/əl/" }}
+  ]
+}}```"""
+    
+    
     client = anthropic.Anthropic()
     response = client.messages.create(
         model="claude-opus-4-20250514",
