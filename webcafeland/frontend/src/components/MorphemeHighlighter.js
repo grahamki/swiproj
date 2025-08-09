@@ -363,6 +363,7 @@ const MorphemeHighlighter = () => {
               }
             : {})}
         >
+          {/* word text (segmented or raw) */}
           {segs
             ? segs.map((s, k) => (
                 <span key={k} className={`seg ${s.role}`} title={s.meaning || s.role}>
@@ -370,6 +371,24 @@ const MorphemeHighlighter = () => {
                 </span>
               ))
             : t.text}
+
+          {/* explicit dot to ensure visibility regardless of CSS */}
+          {dotted && (
+            <span
+              className="morph-dot"
+              aria-hidden="true"
+              style={{
+                display: 'inline-block',
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                background: '#10b981',
+                marginLeft: 4,
+                verticalAlign: 'middle',
+                pointerEvents: 'none'
+              }}
+            />
+          )}
         </span>
       );
     });

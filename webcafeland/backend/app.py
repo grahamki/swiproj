@@ -20,6 +20,23 @@ app = Flask(__name__)
 # Be explicit: allow all origins to hit any /api/*, expose debug headers
 CORS(app, resources={r"/api/*": {"origins": "*"}}, expose_headers=["X-Analysis-Source", "X-Morpheme-Count", "X-Meaning"])
 
+# Function inventory (usage)
+# - health_check: GET /api/health
+# - api_options: OPTIONS /api/<subpath> for CORS preflight
+# - analyze_morpheme: POST /api/analyze-morpheme (per-tab analysis)
+# - analyze_word_full: GET/POST /api/analyze-word (single full analysis)
+# - _extract_word: used by analyze_morpheme and analyze_word_full
+# - analyze_with_anthropic_morphemes: used by analyze_morpheme
+# - analyze_with_anthropic_full: used by analyze_morpheme and analyze_word_full
+# - _normalize_full_result: used by analyze_with_anthropic_full and analyze_word_full
+# - _enrich_from_morphemes: used by _normalize_full_result
+# - _split_graphemes: used by _enrich_from_morphemes
+# - _compose_meaning, _past_participle, _progressive: used by _enrich_from_morphemes
+# - _maybe_fix_root_for_suffix: used by _enrich_from_morphemes
+# - _build_relatives: used by _enrich_from_morphemes
+# - _debug_log_result: used by analyze_word_full
+# - get_mock_analysis: used by multiple fallbacks
+
 ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY')
 
 @app.route('/api/health', methods=['GET'])
