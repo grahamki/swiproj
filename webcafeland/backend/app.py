@@ -69,11 +69,11 @@ def analyze_morpheme():
     data = request.get_json(silent=True) or {}
     word = _extract_word(request)
     if not word:
-        return jsonify({"error": "ERROR TRY AGAIN"}), 500
+        return jsonify({"error": "Missing word"}), 400
 
     atype = (data.get('type') or data.get('analysis_type') or 'morphemes').lower()
 
-    # morphemes-only: Anthropic only; otherwise error
+    # For morphemes-only (fast), keep the existing behavior
     if atype == 'morphemes':
         if ANTHROPIC_API_KEY and anthropic is not None:
             try:
@@ -83,46 +83,52 @@ def analyze_morpheme():
                     return jsonify(result)
             except Exception as e:
                 print("Anthropic error:", e)
-        # no heuristic fallback
-        resp = jsonify({"error": "ERROR TRY AGAIN"})
-        resp.headers['Access-Control-Allow-Origin'] = '*'
-        resp.headers['Access-Control-Allow-Methods'] = 'GET,POST,OPTIONS'
-        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-        return resp, 500
+        result = get_mock_analysis(word, analysis_type='morphemes')
+        result["source"] = "heuristic"
+        return jsonify(result)
 
-    # Other tabs derive from a single full analysis (Anthropic only)
+    # For other tabs, derive from a single full analysis (Anthropic if available)
+    full = None
     if ANTHROPIC_API_KEY and anthropic is not None:
         try:
             full = analyze_with_anthropic_full(word)
-            if isinstance(full, dict):
-                if atype == 'meaning':
-                    piece = {"meaning": full.get("meaning", "")}
-                elif atype == 'etymology':
-                    piece = {
-                        "historical_origin": full.get("historical_origin", ""),
-                        "morphological_relatives": full.get("morphological_relatives", []),
-                        "etymological_relatives": full.get("etymological_relatives", [])
-                    }
-                elif atype == 'graphemes':
-                    piece = {"graphemes": full.get("graphemes", [])}
-                elif atype == 'relatives':
-                    piece = {
-                        "morphological_relatives": full.get("morphological_relatives", []),
-                        "etymological_relatives": full.get("etymological_relatives", [])
-                    }
-                else:
-                    piece = {"word": full.get("word", word), "morphemes": full.get("morphemes", [])}
-                piece["source"] = "anthropic"
-                return jsonify(piece)
         except Exception as e:
             print("Anthropic full error:", e)
 
-    # no heuristic fallback
-    resp = jsonify({"error": "ERROR TRY AGAIN"})
-    resp.headers['Access-Control-Allow-Origin'] = '*'
-    resp.headers['Access-Control-Allow-Methods'] = 'GET,POST,OPTIONS'
-    resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-    return resp, 500
+    if not isinstance(full, dict):
+        # Heuristic fallback for non-morpheme tabs
+        mock = get_mock_analysis(word, analysis_type='morphemes')
+        full = {
+            "word": word,
+            "morphemes": mock.get("morphemes", []),
+            "meaning": f"Definition unavailable for '{word}'.",
+            "morphological_relatives": [],
+            "etymological_relatives": [],
+            "historical_origin": "",
+            "graphemes": [{"grapheme": ch, "ipa": ""} for ch in re.findall(r"[A-Za-z]+|.", word) if ch.strip()]
+        }
+
+    # Build the specific piece to return (avoid nested function to prevent indentation issues)
+    if atype == 'meaning':
+        piece = {"meaning": full.get("meaning", "")}
+    elif atype == 'etymology':
+        piece = {
+            "historical_origin": full.get("historical_origin", ""),
+            "morphological_relatives": full.get("morphological_relatives", []),
+            "etymological_relatives": full.get("etymological_relatives", [])
+        }
+    elif atype == 'graphemes':
+        piece = {"graphemes": full.get("graphemes", [])}
+    elif atype == 'relatives':
+        piece = {
+            "morphological_relatives": full.get("morphological_relatives", []),
+            "etymological_relatives": full.get("etymological_relatives", [])
+        }
+    else:
+        piece = {"word": full.get("word", word), "morphemes": full.get("morphemes", [])}
+
+    piece["source"] = "anthropic" if ANTHROPIC_API_KEY and anthropic is not None else "heuristic"
+    return jsonify(piece)
 
 # --- Heuristic enrichment helpers ---
 _DIGRAPHS = [
@@ -354,42 +360,52 @@ def _debug_log_result(tag: str, word: str, result: dict):
 
 @app.route('/api/analyze-word', methods=['POST', 'GET'])
 def analyze_word_full():
-    """Full analysis for a word (Anthropic only)."""
+    """Full analysis for a word: morphemes, meaning, relatives, etymology, graphemes."""
     # Accept JSON, form-encoded, or query param
     data = request.get_json(silent=True) or {}
     word = _extract_word(request)
     if not word:
-        resp = jsonify({"error": "ERROR TRY AGAIN"})
-        resp.headers['Access-Control-Allow-Origin'] = '*'
-        resp.headers['Access-Control-Allow-Methods'] = 'GET,POST,OPTIONS'
-        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-        return resp, 500
+        return jsonify({"error": "Missing word"}), 400
 
     if ANTHROPIC_API_KEY and anthropic is not None:
         try:
             result = analyze_with_anthropic_full(word)
             if isinstance(result, dict):
+                result = _normalize_full_result(word, result)
                 result["source"] = "anthropic"
+                _debug_log_result("anthropic", word, result)
                 resp = jsonify(result)
-                resp.headers['X-Analysis-Source'] = 'anthropic'
+                # add debug headers
+                resp.headers['X-Analysis-Source'] = result.get('source', '')
                 resp.headers['X-Morpheme-Count'] = str(len(result.get('morphemes') or []))
                 resp.headers['X-Meaning'] = '1' if (result.get('meaning') or '').strip() else '0'
-                resp.headers['Access-Control-Allow-Origin'] = '*'
-                resp.headers['Access-Control-Allow-Methods'] = 'GET,POST,OPTIONS'
-                resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
                 return resp
         except Exception as e:
             print("Anthropic full error:", e)
-
-    # no heuristic fallback
-    resp = jsonify({"error": "ERROR TRY AGAIN"})
+    # Fallback heuristic shape
+    mock = get_mock_analysis(word, analysis_type='morphemes')
+    result = _normalize_full_result(word, {
+        "word": word,
+        "morphemes": mock.get("morphemes", []),
+        "meaning": "",
+        "morphological_relatives": [],
+        "etymological_relatives": [],
+        "historical_origin": "",
+        "graphemes": [],
+    })
+    result["source"] = "heuristic"
+    _debug_log_result("heuristic", word, result)
+    resp = jsonify(result)
+    resp.headers['X-Analysis-Source'] = result.get('source', '')
+    resp.headers['X-Morpheme-Count'] = str(len(result.get('morphemes') or []))
+    resp.headers['X-Meaning'] = '1' if (result.get('meaning') or '').strip() else '0'
     resp.headers['Access-Control-Allow-Origin'] = '*'
     resp.headers['Access-Control-Allow-Methods'] = 'GET,POST,OPTIONS'
     resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-    return resp, 500
+    return resp
 
 def analyze_with_anthropic_morphemes(word):
-    """Ask Anthropic for a JSON morpheme breakdown; no heuristic fallback."""
+    """Ask Anthropic for a JSON morpheme breakdown; robustly parse fenced code."""
     prompt = f"""
     Break the word "{word}" into morphemes and return JSON only.
     Schema:
@@ -413,6 +429,7 @@ def analyze_with_anthropic_morphemes(word):
     if content is None:
         content = getattr(response, "content", "") or ""
 
+    # strip code fences if present
     content = content.strip()
     if content.startswith("```"):
         first_nl = content.find("\n")
@@ -420,28 +437,43 @@ def analyze_with_anthropic_morphemes(word):
     if content.endswith("```"):
         content = content[:-3]
 
-    # Parse strictly; raise on any issue
-    result = json.loads(content)
-    if not isinstance(result, dict):
-        raise ValueError("Anthropic morphemes: not an object")
-    result.setdefault("word", word)
-    result.setdefault("morphemes", [])
-    return result
+    try:
+        result = json.loads(content)
+        if not isinstance(result, dict):
+            raise ValueError("Not an object")
+        result.setdefault("word", word)
+        result.setdefault("morphemes", [])
+        # Heuristic enrich: if Anthropic returned <=1 segment, try to add prefix/suffix/root
+        if not isinstance(result.get("morphemes"), list) or len(result["morphemes"]) <= 1:
+            fallback = get_mock_analysis(word).get("morphemes", [])
+            if isinstance(fallback, list) and len(fallback) > len(result.get("morphemes", [])):
+                result["morphemes"] = fallback
+        return result
+    except Exception as e:
+        print("JSON parse error from Anthropic:", e, "content:", content)
+        return {"word": word, "morphemes": get_mock_analysis(word).get("morphemes", [])}
 
 def analyze_with_anthropic_full(word):
-    """Anthropic comprehensive JSON; no heuristic fallback or normalization."""
+    """Anthropic prompt to return comprehensive JSON with morphemes, meaning, relatives, etymology, graphemes."""
     prompt = f"""
 Break the word "{word}" into morphemes and graphemes, and return the result as a JSON object.
 You are a linguist AI that breaks down English words into morphemes, graphemes, and explains their meaning, sound, and origin.
 
-Return JSON with keys:
-- word
-- morphemes: [{{morpheme, type, meaning}}]
-- meaning
-- morphological_relatives
-- etymological_relatives
-- historical_origin
-- graphemes: [{{grapheme, ipa}}]
+Given a word, return a structured JSON object with the following fields:
+- "word": the original word
+- "morphemes": a list of objects, each with:
+  - "morpheme": the morpheme string (e.g. "un", "believe", "able"). Please note the root should be a real word (e.g. "believe" not "believ").
+  - "type": one of "prefix", "root", or "suffix"
+  - "meaning": a brief definition
+- "meaning": a one-sentence overall definition of the word
+- "morphological_relatives": a list of words that share both the root and base (e.g. "believe", "believable", "disbelievable")
+- "etymological_relatives": a list of words that share the historical root only (e.g. "belief", "believer", "credence")
+- "historical_origin": a brief description of the word's origin and evolution
+- "graphemes": a list of objects, each with:
+  - "grapheme": the letter or group of letters representing a sound (e.g., "ph", "a", "th")
+  - "ipa": the corresponding IPA phonetic symbol (e.g., "f", "ə", "θ")
+
+Return only valid JSON. Do not include any commentary or code fences.
 """
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
     response = client.messages.create(
@@ -459,16 +491,32 @@ Return JSON with keys:
         content = getattr(response, "content", "") or ""
     content = content.strip()
 
+    # Strip code fences if any slipped through
     if content.startswith("```"):
         first_nl = content.find("\n")
         content = content[first_nl + 1 :] if first_nl != -1 else content
     if content.endswith("```"):
         content = content[:-3]
 
-    result = json.loads(content)
-    if not isinstance(result, dict):
-        raise ValueError("Anthropic full: not an object")
-    return result
+    try:
+        result = json.loads(content)
+        if not isinstance(result, dict):
+            raise ValueError("Not an object")
+        # Normalize and enrich before returning
+        return _normalize_full_result(word, result)
+    except Exception as e:
+        print("JSON parse error from Anthropic (full):", e, "content:", content)
+        mock = get_mock_analysis(word)
+        # Build minimal then enrich so panel isn't empty
+        return _normalize_full_result(word, {
+            "word": word,
+            "morphemes": mock.get("morphemes", []),
+            "meaning": "",
+            "morphological_relatives": [],
+            "etymological_relatives": [],
+            "historical_origin": "",
+            "graphemes": [],
+        })
 
 # Simple heuristic fallback that extracts prefix/root/suffix
 def get_mock_analysis(word, analysis_type='morphemes'):

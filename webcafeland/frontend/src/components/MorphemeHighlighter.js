@@ -126,53 +126,133 @@ const MorphemeHighlighter = () => {
     setSelectedWord(word);
     setActiveView('morphemes');
     setLeftOpen(true);
-
-    // Reset data + set all tabs loading
-    setAnalysisData({ morphemes: null, meaning: null, etymology: null, graphemes: null, relatives: null });
-    setLoadingTabs({ morphemes: true, meaning: true, etymology: true, graphemes: true, relatives: true });
+    
+    // Reset data
+    setAnalysisData({
+      morphemes: null,
+      meaning: null,
+      etymology: null,
+      graphemes: null,
+      relatives: null
+    });
+    
+    // Set loading for all tabs
+    setLoadingTabs({
+      morphemes: true,
+      meaning: true,
+      etymology: true,
+      graphemes: true,
+      relatives: true
+    });
     setError(null);
 
     try {
+      // Load all data types at once to prevent blank tabs
       const tabTypes = ['morphemes', 'meaning', 'etymology', 'graphemes', 'relatives'];
-      // Fail fast: let any request rejection bubble up to catch
-      const results = await Promise.all(
-        tabTypes.map(type =>
-          apiService.analyzeMorpheme(word, type).then(result => ({ type, result }))
-        )
+      const promises = tabTypes.map(type => 
+        apiService.analyzeMorpheme(word, type)
+          .then(result => {
+            console.log(`Received ${type} data:`, JSON.stringify(result, null, 2));
+            return { type, result };
+          })
+          .catch(err => {
+            console.error(`Failed to load ${type} data:`, err);
+            return { type, result: null };
+          })
       );
-
+      
+      const results = await Promise.all(promises);
+      console.log("All results:", results);
+      
+      // Update analysis data with all results
       const newData = { ...analysisData };
       results.forEach(({ type, result }) => {
-        if (type === 'morphemes') {
-          newData[type] = result;
-        } else if (type === 'meaning') {
-          newData[type] = result;
-        } else if (type === 'etymology') {
-          // Keep minimal shaping, no heuristic text
-          newData[type] = {
-            historical_origin: result.historical_origin || "",
-            morphological_relatives: result.morphological_relatives || [],
-            etymological_relatives: result.etymological_relatives || [],
-            notAvailable: false
-          };
-        } else if (type === 'graphemes') {
-          newData[type] = { graphemes: result.graphemes || [] };
-        } else if (type === 'relatives') {
-          newData[type] = {
-            morphological_relatives: result.morphological_relatives || [],
-            etymological_relatives: result.etymological_relatives || []
-          };
+        // Ensure data has expected structure for each type
+        if (result) {
+          // For morphemes tab, keep existing structure
+          if (type === 'morphemes') {
+            newData[type] = result;
+          } 
+          // For meaning tab, ensure it has a meaning field
+          else if (type === 'meaning') {
+            // Don't nest the meaning result in another object
+            newData[type] = result;
+          } 
+          // For etymology tab, ensure it has required fields
+          else if (type === 'etymology') {
+            // Add specific debug logging for etymology
+            console.log("Etymology result:", result);
+            
+            // Don't set notAvailable flag so easily - only if we truly have no data
+            if ((!result.historical_origin || result.historical_origin === "") && 
+                (!result.morphological_relatives || result.morphological_relatives.length === 0) && 
+                (!result.etymological_relatives || result.etymological_relatives.length === 0)) {
+              newData[type] = { 
+                historical_origin: "Etymology information not available for this word.",
+                notAvailable: true,
+                morphological_relatives: [],
+                etymological_relatives: []
+              };
+            } else {
+              // Always try to show whatever data we have
+              newData[type] = {
+                historical_origin: result.historical_origin || "No historical origin data available",
+                morphological_relatives: result.morphological_relatives || [],
+                etymological_relatives: result.etymological_relatives || [],
+                notAvailable: false // explicitly set to false
+              };
+            }
+          } 
+          // For graphemes tab, ensure it has graphemes array
+          else if (type === 'graphemes') {
+            newData[type] = {
+              graphemes: result.graphemes || []
+            };
+          }
+          // For relatives tab, ensure it has morphological and etymological relatives arrays
+          else if (type === 'relatives') {
+            newData[type] = {
+              morphological_relatives: result.morphological_relatives || [],
+              etymological_relatives: result.etymological_relatives || []
+            };
+          }
+        } else {
+          // Default fallback for failed requests
+          if (type === 'morphemes') {
+            newData[type] = { morphemes: [] };
+          } else if (type === 'meaning') {
+            newData[type] = { meaning: "No meaning data available" };
+          } else if (type === 'etymology') {
+            newData[type] = {
+              historical_origin: "No historical origin data available",
+              morphological_relatives: [],
+              etymological_relatives: []
+            };
+          } else if (type === 'graphemes') {
+            newData[type] = { graphemes: [] };
+          } else if (type === 'relatives') {
+            newData[type] = {
+              morphological_relatives: [],
+              etymological_relatives: []
+            };
+          }
         }
       });
-
+      
+      console.log("Final analysis data:", newData);
       setAnalysisData(newData);
     } catch (err) {
-      console.error('Analyze error:', err);
-      // No fallback content; show a single error message
-      setError('ERROR TRY AGAIN');
-      setAnalysisData({ morphemes: null, meaning: null, etymology: null, graphemes: null, relatives: null });
+      console.error('Failed to analyze word:', err);
+      setError('Failed to analyze word. Please try again.');
     } finally {
-      setLoadingTabs({ morphemes: false, meaning: false, etymology: false, graphemes: false, relatives: false });
+      // Clear loading state for all tabs
+      setLoadingTabs({
+        morphemes: false,
+        meaning: false,
+        etymology: false,
+        graphemes: false,
+        relatives: false
+      });
     }
   };
 
