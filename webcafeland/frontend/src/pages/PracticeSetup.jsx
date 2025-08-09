@@ -47,16 +47,22 @@ export default function PracticeSetup() {
     });
   };
 
+  // Centralized navigation (supports BrowserRouter and HashRouter)
+  const navigateTo = (path) => {
+    const href = String(window.location.href || '');
+    const target = path.startsWith('/') ? path : `/${path}`;
+    if (href.includes('#')) {
+      window.location.hash = target;
+    } else {
+      window.location.assign(target);
+    }
+  };
+
   const startGame = () => {
     const chosen = tray.filter(w => selected.has(w.toLowerCase()));
     if (chosen.length === 0) return;
     practiceStore.setSelectedWords(chosen);
-    // Works with or without a router
-    if (String(window.location.href || '').includes('#')) {
-      window.location.hash = '/practice/play';
-    } else {
-      window.location.assign('/practice/play');
-    }
+    navigateTo('/practice/play');
   };
 
   useEffect(() => {
@@ -70,7 +76,7 @@ export default function PracticeSetup() {
         <h2>Practice</h2>
         <p>No words in your Finish Reading tray yet.</p>
         <p>Go back, click some words while reading, then return here.</p>
-        <button className="swi-btn" onClick={() => (window.location.assign('/'))}>Back to Home</button>
+        <button className="swi-btn" onClick={() => navigateTo('/')}>Back to Home</button>
       </div>
     );
   }
@@ -102,7 +108,7 @@ export default function PracticeSetup() {
           >
             Start Game ({tray.filter(w => selected.has(w.toLowerCase())).length})
           </button>
-          <button className="swi-btn ghost" onClick={() => (window.location.assign('/'))}>Exit</button>
+          <button className="swi-btn ghost" onClick={() => navigateTo('/')}>Exit</button>
         </div>
       </header>
 

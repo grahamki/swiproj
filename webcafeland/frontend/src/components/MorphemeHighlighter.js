@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import './MorphemeHighlighter.css';
 import apiService from '../services/api';
 
@@ -336,24 +336,32 @@ const MorphemeHighlighter = () => {
       if (!t.isWord) return <span key={i}>{t.text}</span>;
       const segs = overlays[t.idx];
       const dotted = showHintDots && isComplex(t.text);
+      const isClickable = dotted; // only dotted words are interactive
+
       return (
         <span
           key={i}
           data-idx={t.idx}
-          className={`clickable-word mh-word ${dotted ? 'has-morph' : ''}`}
-          // Call both: fast inline segmentation + open side panel + load tabs
-          onClick={(e) => { handleWordClickInline(t.text, t.idx); handleWordClick(t.text, e); }}
-          role="button"
-          tabIndex={0}
-          aria-label={dotted ? 'Likely morphologically complex' : undefined}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              handleWordClickInline(t.text, t.idx);
-              handleWordClick(t.text, e);
-            }
-          }}
-          title={`Click to analyze: ${t.text}`}
+          className={`${isClickable ? 'clickable-word ' : ''}mh-word ${dotted ? 'has-morph' : ''}`}
+          title={isClickable ? `Click to analyze: ${t.text}` : undefined}
+          aria-label={isClickable ? 'Likely morphologically complex' : undefined}
+          {...(isClickable
+            ? {
+                onClick: (e) => {
+                  handleWordClickInline(t.text, t.idx);
+                  handleWordClick(t.text, e);
+                },
+                role: 'button',
+                tabIndex: 0,
+                onKeyDown: (e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleWordClickInline(t.text, t.idx);
+                    handleWordClick(t.text, e);
+                  }
+                },
+              }
+            : {})}
         >
           {segs
             ? segs.map((s, k) => (
@@ -386,9 +394,35 @@ const MorphemeHighlighter = () => {
     </div>
   );
 
+  // Use .env override, default to /practice (not /practice-game)
+  const PRACTICE_GAME_URL = process.env.REACT_APP_PRACTICE_URL || '/practice';
+
+  // Navigate to practice (supports BrowserRouter and HashRouter)
+  const goToPractice = useCallback(() => {
+    const target = PRACTICE_GAME_URL;
+    const href = String(window.location.href || '');
+    if (href.includes('#')) {
+      // Hash routing
+      window.location.hash = target.startsWith('#') ? target : `#${target}`;
+    } else {
+      // Path routing
+      window.location.assign(target);
+    }
+  }, []);
+
   return (
     // Wrap with a shell that allows left panel to slide in
-    <div className="mh-shell" style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+    <div
+      className="mh-shell"
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        width: '100%',
+        // Push the content when the left panel is open
+        paddingLeft: leftOpen ? 200 : 0,
+        transition: 'padding-left .2s ease-out'
+      }}
+    >
       {/* LEFT SIDE PANEL (replaces centered popup) */}
       <aside
         className={`mh-left-panel ${leftOpen ? 'open' : ''}`}
@@ -628,7 +662,14 @@ const MorphemeHighlighter = () => {
       <div className="container" style={{ margin: '0 auto', maxWidth: 1100, width: '100%' }}>
         <div className="header">
           <h1>📚 Morpheme Highlighter</h1>
-          <p>Highlight any word or section to break it down or summarize.</p>
+          <button
+            type="button"
+            className="mode-button practice-btn"
+            onClick={goToPractice}
+            title="Practice words from your tray"
+          >
+            Practice
+          </button>
         </div>
 
         <div className="content">
@@ -636,8 +677,14 @@ const MorphemeHighlighter = () => {
             <label htmlFor="text-input" className="input-label">
               Paste or type your text here:
             </label>
-            <div className="text-display" ref={textAreaRef}>
+            <div
+              className="text-display"
+              ref={textAreaRef}
+              // Fixed height, scrollable content
+              style={{ height: 320, overflowY: 'auto', borderRadius: 8 }}
+            >
               {!isEditMode && text ? (
+                // Reader view stays inside the scrollable wrapper
                 <div className="clickable-text">{renderTextWithClickableWords()}</div>
               ) : (
                 <textarea
@@ -646,6 +693,8 @@ const MorphemeHighlighter = () => {
                   placeholder="Paste or type your text here...Try highlighting a word to see its morphemes."
                   value={text}
                   onChange={handleTextChange}
+                  // Fill the scroll area without growing the page
+                  style={{ width: '100%', height: '100%', overflowY: 'auto', resize: 'none' }}
                 />
               )}
             </div>
@@ -661,16 +710,11 @@ const MorphemeHighlighter = () => {
                   <button className="clear-button" onClick={() => { setText(''); setAnalysisData({ morphemes: null, meaning: null, etymology: null, graphemes: null, relatives: null }); setError(null); setLeftOpen(false); setIsEditMode(true); }}>Clear Text</button>
                   {/* New: dots toggle + Finish Reading */}
                   <button className="clear-button" onClick={() => setShowHintDots(v => !v)} title="Toggle hint dots">{showHintDots ? '• Hide Dots' : '• Show Dots'}</button>
-                  <button className="mode-button" onClick={() => setShowPractice(v => !v)} title="Open practice tray">Finish Reading ({clickedWords.length})</button>
+                  <button className="mode-button" onClick={() => setShowPractice(v => !v)} title="Open practice tray">Show Words ({clickedWords.length})</button>
                 </>
               )}
             </div>
           </div>
-
-          {/* Clickable words */}
-          {!isEditMode && text ? (
-            <div className="clickable-text">{renderTextWithClickableWords()}</div>
-          ) : null}
 
           {/* Practice tray */}
           {showPractice && (
