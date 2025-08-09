@@ -574,3 +574,22 @@
   vertical-align: super;
   color: currentColor;
 }
+
+.header {
+  position: relative; /* enable absolute positioning for header actions */
+}
+
+/* Top-right Practice button */
+.practice-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+}
+
+.mh-list {
+  list-style: none;
+  padding-left: 0;
+  margin: .25rem 0 .75rem;
+}
+.mh-list li { margin: .25rem 0; }
