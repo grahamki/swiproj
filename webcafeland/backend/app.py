@@ -1,53 +1,185 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import os
+import re
 import json
 from dotenv import load_dotenv
-import anthropic
-from anthropic.types.text_block import TextBlock
 
-# Load environment variables from .env file
+# Try optional Anthropic import (fallback to heuristic if not available or no key)
+try:
+    import anthropic
+    from anthropic.types.text_block import TextBlock
+except Exception:
+    anthropic = None
+    TextBlock = None
+
+# Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
 ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY')
-print("ANTHROPIC_API_KEY:", ANTHROPIC_API_KEY[:8] if ANTHROPIC_API_KEY else None)
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
-    return jsonify({"status": "healthy", "message": "Morpheme Highlighter API is running!"})
+    return jsonify({"ok": True})
 
+# Analyze morphemes
 @app.route('/api/analyze-morpheme', methods=['POST'])
 def analyze_morpheme():
-    try:
-        data = request.get_json()
-        word = data.get('word', '').strip().lower()
-        if not word:
-            return jsonify({"error": "Word cannot be empty"}), 400
+    data = request.get_json(silent=True) or {}
+    word = (data.get('word') or '').strip()
+    if not word:
+        return jsonify({"error": "Missing word"}), 400
 
-        analysis = analyze_word_with_ai(word)
-        return jsonify(analysis)
-    except Exception as e:
-        print(f"Error analyzing word: {str(e)}")
-        return jsonify({"error": "Failed to analyze word"}), 500
+    atype = (data.get('type') or data.get('analysis_type') or 'morphemes').lower()
 
-def analyze_word_with_ai(word):
-    if ANTHROPIC_API_KEY:
+    # For morphemes-only (fast), keep the existing behavior
+    if atype == 'morphemes':
+        if ANTHROPIC_API_KEY and anthropic is not None:
+            try:
+                result = analyze_with_anthropic_morphemes(word)
+                if result and isinstance(result, dict):
+                    result["source"] = "anthropic"
+                    return jsonify(result)
+            except Exception as e:
+                print("Anthropic error:", e)
+        result = get_mock_analysis(word, analysis_type='morphemes')
+        result["source"] = "heuristic"
+        return jsonify(result)
+
+    # For other tabs, derive from a single full analysis (Anthropic if available)
+    full = None
+    if ANTHROPIC_API_KEY and anthropic is not None:
         try:
-            return analyze_with_anthropic(word)
+            full = analyze_with_anthropic_full(word)
         except Exception as e:
-            print(f"Anthropic analysis failed: {str(e)}")
-    return get_mock_analysis(word)
+            print("Anthropic full error:", e)
 
-def analyze_with_anthropic(word):
+    if not isinstance(full, dict):
+        # Heuristic fallback for non-morpheme tabs
+        mock = get_mock_analysis(word, analysis_type='morphemes')
+        full = {
+            "word": word,
+            "morphemes": mock.get("morphemes", []),
+            "meaning": f"Definition unavailable for '{word}'.",
+            "morphological_relatives": [],
+            "etymological_relatives": [],
+            "historical_origin": "",
+            "graphemes": [{"grapheme": ch, "ipa": ""} for ch in re.findall(r"[A-Za-z]+|.", word) if ch.strip()]
+        }
+
+    def pick_piece(full_obj, t):
+        if t == 'meaning':
+            return {"meaning": full_obj.get("meaning", "")}
+        if t == 'etymology':
+            return {
+                "historical_origin": full_obj.get("historical_origin", ""),
+                "morphological_relatives": full_obj.get("morphological_relatives", []),
+                "etymological_relatives": full_obj.get("etymological_relatives", [])
+            }
+        if t == 'graphemes':
+            return {"graphemes": full_obj.get("graphemes", [])}
+        if t == 'relatives':
+            return {
+                "morphological_relatives": full_obj.get("morphological_relatives", []),
+                "etymological_relatives": full_obj.get("etymological_relatives", [])
+            }
+        # default: morphemes
+        return {"word": full_obj.get("word", word), "morphemes": full_obj.get("morphemes", [])}
+
+    piece = pick_piece(full, atype)
+    piece["source"] = "anthropic" if ANTHROPIC_API_KEY and anthropic is not None else "heuristic"
+    return jsonify(piece)
+
+@app.route('/api/analyze-word', methods=['POST'])
+def analyze_word_full():
+    """Full analysis for a word: morphemes, meaning, relatives, etymology, graphemes."""
+    data = request.get_json(silent=True) or {}
+    word = (data.get('word') or '').strip()
+    if not word:
+        return jsonify({"error": "Missing word"}), 400
+
+    if ANTHROPIC_API_KEY and anthropic is not None:
+        try:
+            result = analyze_with_anthropic_full(word)
+            if isinstance(result, dict):
+                result["source"] = "anthropic"
+                return jsonify(result)
+        except Exception as e:
+            print("Anthropic full error:", e)
+
+    # Fallback heuristic shape
+    mock = get_mock_analysis(word, analysis_type='morphemes')
+    result = {
+        "word": word,
+        "morphemes": mock.get("morphemes", []),
+        "meaning": f"Definition unavailable for '{word}'.",
+        "morphological_relatives": [],
+        "etymological_relatives": [],
+        "historical_origin": "",
+        "graphemes": [{"grapheme": ch, "ipa": ""} for ch in re.findall(r"[A-Za-z]+|.", word) if ch.strip()],
+        "source": "heuristic"
+    }
+    return jsonify(result)
+
+def analyze_with_anthropic_morphemes(word):
+    """Ask Anthropic for a JSON morpheme breakdown; robustly parse fenced code."""
     prompt = f"""
-Break the word "{word}" into morphemes and graphemes, and return the result as a JSON object. 
+    Break the word "{word}" into morphemes and return JSON only.
+    Schema:
+    {{
+      "word": "<word>",
+      "morphemes": [{{ "morpheme": "<str>", "type": "prefix|root|suffix", "meaning": "<short>" }}]
+    }}
+    """
+    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+    response = client.messages.create(
+        model="claude-3-haiku-20240307",
+        max_tokens=400,
+        temperature=0,
+        system="Return only valid minified JSON. No prose.",
+        messages=[{"role": "user", "content": prompt}],
+    )
+
+    content = None
+    if TextBlock:
+        content = next((b.text for b in response.content if isinstance(b, TextBlock)), None)
+    if content is None:
+        content = getattr(response, "content", "") or ""
+
+    # strip code fences if present
+    content = content.strip()
+    if content.startswith("```"):
+        first_nl = content.find("\n")
+        content = content[first_nl + 1 :] if first_nl != -1 else content
+    if content.endswith("```"):
+        content = content[:-3]
+
+    try:
+        result = json.loads(content)
+        if not isinstance(result, dict):
+            raise ValueError("Not an object")
+        result.setdefault("word", word)
+        result.setdefault("morphemes", [])
+        # Heuristic enrich: if Anthropic returned <=1 segment, try to add prefix/suffix/root
+        if not isinstance(result.get("morphemes"), list) or len(result["morphemes"]) <= 1:
+            fallback = get_mock_analysis(word).get("morphemes", [])
+            if isinstance(fallback, list) and len(fallback) > len(result.get("morphemes", [])):
+                result["morphemes"] = fallback
+        return result
+    except Exception as e:
+        print("JSON parse error from Anthropic:", e, "content:", content)
+        return {"word": word, "morphemes": get_mock_analysis(word).get("morphemes", [])}
+
+def analyze_with_anthropic_full(word):
+    """Anthropic prompt to return comprehensive JSON with morphemes, meaning, relatives, etymology, graphemes."""
+    prompt = f"""
+Break the word "{word}" into morphemes and graphemes, and return the result as a JSON object.
 You are a linguist AI that breaks down English words into morphemes, graphemes, and explains their meaning, sound, and origin.
 
 Given a word, return a structured JSON object with the following fields:
-
 - "word": the original word
 - "morphemes": a list of objects, each with:
   - "morpheme": the morpheme string (e.g. "un", "believe", "able"). Please note the root should be a real word (e.g. "believe" not "believ").
@@ -61,86 +193,116 @@ Given a word, return a structured JSON object with the following fields:
   - "grapheme": the letter or group of letters representing a sound (e.g., "ph", "a", "th")
   - "ipa": the corresponding IPA phonetic symbol (e.g., "f", "ə", "θ")
 
-### Example:
-
-Word: "unbelievable"
-
-```json
-{{
-  "word": "unbelievable",
-  "morphemes": [
-    {{ "morpheme": "un", "type": "prefix", "meaning": "not" }},
-    {{ "morpheme": "believe", "type": "root", "meaning": "accept as true" }},
-    {{ "morpheme": "able", "type": "suffix", "meaning": "capable of" }}
-  ],
-  "meaning": "Something that cannot be believed",
-  "morphological_relatives": ["believable", "unbelievably", "disbelievable"],
-  "etymological_relatives": ["belief", "believer", "credence"],
-  "historical_origin": "Old English, from Proto-Germanic *ga-laubjan, from PIE root *leubh- ('to care or believe')",
-  "graphemes": [
-    {{ "grapheme": "u",  "ipa": "/ʌ/" }},
-    {{ "grapheme": "n",  "ipa": "/n/" }},
-    {{ "grapheme": "b",  "ipa": "/b/" }},
-    {{ "grapheme": "e",  "ipa": "/ɪ/" }},
-    {{ "grapheme": "l",  "ipa": "/l/" }},
-    {{ "grapheme": "ie", "ipa": "/iː/" }},
-    {{ "grapheme": "v",  "ipa": "/v/" }},
-    {{ "grapheme": "a",  "ipa": "/ə/" }},
-    {{ "grapheme": "b",  "ipa": "/b/" }},
-    {{ "grapheme": "le", "ipa": "/əl/" }}
-  ]
-}}```"""
-    
-    
-    client = anthropic.Anthropic()
+Return only valid JSON. Do not include any commentary or code fences.
+"""
+    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
     response = client.messages.create(
-        model="claude-opus-4-20250514",
-        max_tokens=1000,
-        temperature=1,
-        system="You are a morpheme analyzer. Return a JSON breakdown of the word's morphemes.",
-        messages=[{"role": "user", "content": prompt}]
+        model="claude-3-haiku-20240307",
+        max_tokens=700,
+        temperature=0,
+        system="Return only valid minified JSON. No prose.",
+        messages=[{"role": "user", "content": prompt}],
     )
 
-    content = next((block.text.strip() for block in response.content if isinstance(block, TextBlock)), None)
+    content = None
+    if TextBlock:
+        content = next((b.text for b in response.content if isinstance(b, TextBlock)), None)
+    if content is None:
+        content = getattr(response, "content", "") or ""
+    content = content.strip()
 
-    if content.startswith("```json"):
-        content = content[7:]  # remove "```json\n"
+    # Strip code fences if any slipped through
+    if content.startswith("```"):
+        first_nl = content.find("\n")
+        content = content[first_nl + 1 :] if first_nl != -1 else content
     if content.endswith("```"):
-        content = content[:-3]  # remove ending ``
+        content = content[:-3]
 
     try:
-        return json.loads(content)
-    except json.JSONDecodeError:
-        import re
-        match = re.search(r'\{.*\}', content, re.DOTALL)
-        if match:
-            return json.loads(match.group())
-        raise
-
-#def get_mock_analysis(word):
-    mock_data = {
-        "disrespectfully": {
-            "prefix": {"part": "dis", "meaning": "not / opposite of"},
-            "root": {"part": "respect", "meaning": "to show regard"},
-            "suffix1": {"part": "ful", "meaning": "full of"},
-            "suffix2": {"part": "ly", "meaning": "in a way that..."},
-            "example": "He spoke disrespectfully to the teacher.",
-            "related": ["respect", "respectful", "disrespect"]
-        },
-        "happiness": {
-            "root": {"part": "happy", "meaning": "feeling joy"},
-            "suffix1": {"part": "ness", "meaning": "state or quality of"},
-            "example": "Her happiness was contagious.",
-            "related": ["happy", "sadness", "joyfulness"]
+        result = json.loads(content)
+        if not isinstance(result, dict):
+            raise ValueError("Not an object")
+        # normalize/ensure fields
+        result.setdefault("word", word)
+        result.setdefault("morphemes", [])
+        result.setdefault("meaning", "")
+        result.setdefault("morphological_relatives", [])
+        result.setdefault("etymological_relatives", [])
+        result.setdefault("historical_origin", "")
+        result.setdefault("graphemes", [])
+        # Heuristic enrich morphemes if short
+        if not isinstance(result.get("morphemes"), list) or len(result["morphemes"]) <= 1:
+            fallback = get_mock_analysis(word).get("morphemes", [])
+            if isinstance(fallback, list) and len(fallback) > len(result.get("morphemes", [])):
+                result["morphemes"] = fallback
+        return result
+    except Exception as e:
+        print("JSON parse error from Anthropic (full):", e, "content:", content)
+        mock = get_mock_analysis(word)
+        return {
+            "word": word,
+            "morphemes": mock.get("morphemes", []),
+            "meaning": "",
+            "morphological_relatives": [],
+            "etymological_relatives": [],
+            "historical_origin": "",
+            "graphemes": []
         }
+
+# Simple heuristic fallback that extracts prefix/root/suffix
+def get_mock_analysis(word, analysis_type='morphemes'):
+    w = re.sub(r"[^A-Za-z\-']", "", word)
+    if not w or re.search(r"\d", w):
+        return {"word": word, "morphemes": []}
+
+    prefixes = {
+        "anti": "against", "auto": "self", "bi": "two", "co": "together",
+        "contra": "against", "de": "down/away", "dis": "not/opposite",
+        "en": "cause to", "em": "cause to", "ex": "out", "fore": "before",
+        "im": "not", "in": "not/into", "inter": "between", "mis": "wrongly",
+        "non": "not", "over": "too much", "pre": "before", "pro": "forward",
+        "re": "again", "sub": "under", "super": "above", "trans": "across",
+        "un": "not", "under": "below"
+    }
+    suffixes = {
+        "able": "capable of", "ible": "capable of", "al": "relating to",
+        "ed": "past tense", "en": "made of", "er": "one who/more",
+        "est": "most", "ful": "full of", "ic": "relating to", "ing": "action",
+        "ion": "act/state", "tion": "act", "ation": "act",
+        "ity": "state/quality", "ive": "tending to", "less": "without",
+        "ly": "in the manner of", "ment": "result", "ness": "state",
+        "ous": "full of", "s": "plural", "es": "plural"
     }
 
-    return mock_data.get(word, {
-        "root": {"part": word, "meaning": "word root"},
-        "example": f"The word '{word}' appears in this sentence.",
-        "related": [word]
-    })
+    # find longest matching prefix/suffix
+    p = ""
+    for cand in sorted(prefixes.keys(), key=len, reverse=True):
+        if w.lower().startswith(cand):
+            p = cand
+            break
+
+    s = ""
+    for cand in sorted(suffixes.keys(), key=len, reverse=True):
+        if w.lower().endswith(cand) and len(w) > len(cand):
+            s = cand
+            break
+
+    start = len(p)
+    end_trim = len(s)
+    core = w[start: len(w) - (end_trim if end_trim else 0)]
+    segments = []
+
+    if p:
+        segments.append({"morpheme": p, "type": "prefix", "meaning": prefixes[p]})
+    if core:
+        segments.append({"morpheme": core, "type": "root", "meaning": "root/base"})
+    if s:
+        segments.append({"morpheme": s, "type": "suffix", "meaning": suffixes[s]})
+
+    if not segments:
+        segments = [{"morpheme": word, "type": "root", "meaning": "root/base"}]
+
+    return {"word": word, "morphemes": segments}
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5001))
-    app.run(debug=True, host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=5001, debug=True)

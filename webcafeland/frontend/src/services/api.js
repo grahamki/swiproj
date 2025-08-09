@@ -33,12 +33,12 @@ class ApiService {
     }
 
     // Morpheme analysis
-    async analyzeMorpheme(word) {
+    async analyzeMorpheme(word, analysis_type = 'morphemes') {
         return this.makeRequest('/analyze-morpheme', {
             method: 'POST',
-            body: JSON.stringify({ word }),
+            body: JSON.stringify({ word, analysis_type }),
         });
     }
 }
 
-export default new ApiService(); 
+export default new ApiService();
